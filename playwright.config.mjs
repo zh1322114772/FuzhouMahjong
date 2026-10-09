@@ -16,6 +16,9 @@ export default defineConfig({
   webServer: {
     command: 'dotnet run --project src/ProjectMahjong.Server -c Release --no-build --urls http://127.0.0.1:5271',
     url: 'http://127.0.0.1:5271',
+    env: {
+      Kestrel__Endpoints__Http__Url: 'http://127.0.0.1:5271'
+    },
     reuseExistingServer: true,
     timeout: 120_000
   }

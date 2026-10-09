@@ -3,12 +3,21 @@
 .game-status span { color: var(--muted); }
 .game-status .gold-status { align-items: center; justify-content: space-between; padding: .15rem .45rem; border: 2px solid #e5b532; border-radius: .65rem; background: #fff8d8; }
 
-@media (max-width: 700px) {
-    .game-status { top: .2rem; grid-template-columns: 1fr 1fr; gap: .35rem; padding: .45rem; font-size: .82rem; }
-    .game-status > div:first-child { grid-column: 1 / 3; }
+@media (max-width: 1100px) {
+    .game-status { top: .15rem; grid-template-columns: minmax(7rem, 1.5fr) repeat(3, auto); gap: .35rem; padding: .3rem .4rem; margin-bottom: .35rem; font-size: .7rem; }
+    .game-status > div:first-child { grid-column: auto; min-width: 0; }
+    .game-status > div { align-items: center; white-space: nowrap; }
+    .game-status > div:first-child strong { overflow: hidden; text-overflow: ellipsis; }
+    .game-status .gold-status { gap: .2rem; padding: 0 .25rem; }
+    .game-status ::deep .mahjong-tile.compact { --tile-width: 1.35rem; --tile-height: 1.85rem; }
 }
 
-@media (min-width: 701px) and (max-height: 760px) {
+@media (max-width: 1100px) and (max-height: 500px) and (orientation: landscape) {
+    .game-status { gap: .25rem; padding: .18rem .35rem; margin-bottom: .2rem; font-size: .65rem; }
+    .game-status ::deep .mahjong-tile.compact { --tile-width: 1.1rem; --tile-height: 1.5rem; }
+}
+
+@media (min-width: 1101px) and (max-height: 760px) {
     .game-status { gap: .5rem; padding: .3rem .65rem; margin-bottom: .35rem; }
     .game-status .gold-status { padding-top: 0; padding-bottom: 0; }
     .game-status ::deep .mahjong-tile.compact { --tile-width: 1.7rem; --tile-height: 2.35rem; }

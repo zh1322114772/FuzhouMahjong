@@ -2,7 +2,7 @@
     <header>
         <div>
             <span class="seat-wind">@GameUi.SeatName(Player.Seat)</span>
-            <strong>@Player.DisplayName</strong>
+            <strong class="player-name">@Player.DisplayName</strong>
             @if (Player.IsBot) { <span class="badge bot-badge" title="电脑玩家">电脑</span> }
         </div>
         <strong class="score">@Player.Score 分</strong>
@@ -15,6 +15,7 @@
                 <span>我的手牌</span>
                 <span class="hand-swipe-hint" aria-hidden="true">↔</span>
                 <span class="double-click-hint">双击直接打出</span>
+                <span class="mobile-discard-hint">点牌后在桌面中央确认</span>
                 @if (MyGoldCount > 0)
                 {
                     <strong class="gold-count">金 × @MyGoldCount</strong>

@@ -28,7 +28,6 @@
 .mahjong-tile:not(:disabled):active { transform: translateY(2px); }
 .mahjong-tile.selected { transform: translateY(-.7rem); box-shadow: 0 0 0 4px #f1b83d, 0 .35rem .65rem rgb(0 0 0 / 32%); }
 .mahjong-tile.gold-tile { border-color: #d29c20; border-bottom-color: #ba7b13; box-shadow: inset .14rem .12rem rgb(255 255 255 / 90%), inset -.13rem -.12rem rgb(127 110 78 / 15%), 0 0 0 3px #ffd85a, 0 0 1rem rgb(255 207 52 / 78%); }
-.mahjong-tile.gold-tile::before { content: "金"; position: absolute; z-index: 3; top: -.42rem; right: -.42rem; width: 1.35rem; height: 1.35rem; display: grid; place-items: center; border: 2px solid #fff3b5; border-radius: 50%; color: #fff; background: #c62828; font-size: .72rem; font-weight: 900; box-shadow: 0 2px 5px rgb(0 0 0 / 35%); }
 .mahjong-tile.gold-tile.selected { box-shadow: 0 0 0 5px #ffb300, 0 0 1.25rem rgb(255 196 0 / 90%); }
 .mahjong-tile:disabled { opacity: 1; }
 .mahjong-tile.compact { --tile-width: 2.15rem; --tile-height: 3rem; padding: .05rem .06rem .17rem; border-bottom-width: .2rem; border-radius: .3rem; }

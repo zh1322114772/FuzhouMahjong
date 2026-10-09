@@ -17,6 +17,7 @@
 .own-hand-heading { display: flex; align-items: center; gap: .6rem; margin: .2rem 0; color: var(--muted); font-size: .88rem; }
 .hand-swipe-hint { display: none; padding: .05rem .4rem; border-radius: 99rem; color: #fff; background: #39755b; font-size: 1rem; font-weight: 900; }
 .double-click-hint { padding: .12rem .42rem; border-radius: 99rem; color: #37624d; background: #e1eee7; font-size: .75rem; }
+.mobile-discard-hint { display: none; padding: .12rem .42rem; border-radius: 99rem; color: #37624d; background: #e1eee7; font-size: .7rem; }
 .gold-count { display: inline-flex; align-items: center; padding: .2rem .55rem; border: 2px solid #e1ac24; border-radius: 99rem; color: #8f4d00; background: #fff0a6; font-size: .9rem; box-shadow: 0 0 .6rem rgb(255 204 36 / 55%); }
 .tile-back { width: 1.25rem; height: 1.7rem; display: inline-block; border: 2px solid #d8d0b8; border-bottom: .22rem solid #2d7457; border-radius: .2rem; background: repeating-linear-gradient(45deg, #2f8061 0 3px, #246a50 3px 6px); box-shadow: 0 1px 2px rgb(0 0 0 / 25%); }
 .tile-strip, .meld-strip { display: flex; flex-wrap: wrap; align-items: end; gap: .16rem; }
@@ -37,25 +38,74 @@
     --tile-height: clamp(3.65rem, calc((100vw - 22.5rem) / 13), 5.15rem);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1100px) {
     .player-panel { padding: .35rem; border-radius: .55rem; }
     .player-panel.position-top, .player-panel.position-bottom { grid-column: 1 / 4; }
-    .player-panel.position-bottom { display: block; }
-    .player-panel.position-bottom .public-tiles { display: flex; overflow: visible; border-left: 0; padding-left: 0; }
+    .player-panel.position-bottom { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto minmax(0, 1fr); gap: .1rem; }
+    .player-panel.position-bottom > header,
+    .player-panel.position-bottom .own-hand-area,
+    .player-panel.position-bottom .public-tiles { grid-column: 1; }
+    .player-panel.position-bottom > header { grid-row: 1; }
+    .player-panel.position-bottom .own-hand-area { grid-row: 2; }
+    .player-panel.position-bottom .public-tiles { grid-row: 3; display: flex; overflow: hidden; border-left: 0; padding-left: 0; }
     .player-panel.position-left header, .player-panel.position-right header { flex-direction: column; align-items: stretch; gap: .2rem; }
     .player-panel.position-left header > div, .player-panel.position-right header > div { flex-direction: column; gap: .2rem; }
+    .player-panel.position-left .player-name, .player-panel.position-right .player-name,
+    .player-panel.position-left .score, .player-panel.position-right .score { display: none; }
+    .player-panel.position-left .bot-badge, .player-panel.position-right .bot-badge { display: none; }
     .player-panel.position-left .score, .player-panel.position-right .score { font-size: .72rem; }
     .player-panel.position-left .seat-wind, .player-panel.position-right .seat-wind { width: 1.8rem; height: 1.8rem; }
     .player-panel.position-left .player-meta, .player-panel.position-right .player-meta { margin: .2rem 0; font-size: .72rem; }
-    .hand { min-height: 4.8rem; padding-top: .55rem; }
-    .drawn-tile { margin-left: .5rem; }
-    .drawn-tile::before { left: -.35rem; }
+    .player-panel.position-left .public-tiles,
+    .player-panel.position-right .public-tiles { justify-content: center; }
+    .player-panel.position-left .public-tiles ::deep .mahjong-tile.compact,
+    .player-panel.position-right .public-tiles ::deep .mahjong-tile.compact { --tile-width: 1.05rem; --tile-height: 1.45rem; }
+    .player-panel.position-top .public-tiles ::deep .mahjong-tile.compact,
+    .player-panel.position-bottom .public-tiles ::deep .mahjong-tile.compact { --tile-width: 1.2rem; --tile-height: 1.65rem; }
+    .hand { gap: .1rem; min-height: 2.75rem; padding: .75rem .12rem .1rem; overflow-x: hidden; }
+    .position-bottom .hand ::deep .mahjong-tile {
+        --tile-width: clamp(1rem, calc((100vw - 5.5rem) / 17), 2.65rem);
+        --tile-height: clamp(1.45rem, calc((100vw - 5.5rem) / 12.2), 3.7rem);
+    }
+    .drawn-tile { margin-left: .3rem; }
+    .drawn-tile::before { left: -.24rem; }
     .own-hand-heading { margin: 0; }
-    .hand-swipe-hint { display: inline-flex; }
+    .hand-swipe-hint { display: none; }
     .double-click-hint { display: none; }
+    .mobile-discard-hint { display: inline-flex; }
+    .gold-count { padding: .1rem .35rem; font-size: .72rem; }
+    .player-panel.position-bottom header > div { min-width: 0; }
+    .player-panel.position-bottom .player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
-@media (min-width: 701px) and (max-width: 1700px) and (max-height: 900px) {
+@media (max-width: 1100px) and (max-height: 500px) and (orientation: landscape) {
+    .player-panel { padding: .25rem; }
+    .player-panel.position-top { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: .4rem; }
+    .player-panel.position-top header { gap: .35rem; }
+    .player-panel.position-top header > div { gap: .35rem; }
+    .player-panel.position-top .player-meta { margin: 0; }
+    .player-panel.position-top .public-tiles { min-width: 0; max-height: 100%; overflow: hidden; }
+    .player-panel.position-bottom { grid-template-columns: minmax(0, 1fr) 7rem; grid-template-rows: auto minmax(0, 1fr); column-gap: .35rem; }
+    .player-panel.position-bottom > header { grid-column: 1 / 3; grid-row: 1; }
+    .player-panel.position-bottom .own-hand-area { grid-column: 1; grid-row: 2; min-width: 0; }
+    .player-panel.position-bottom .public-tiles { grid-column: 2; grid-row: 2; align-content: flex-start; overflow: hidden; border-left: 1px solid var(--border); padding-left: .3rem; }
+    .player-panel.position-left .seat-wind, .player-panel.position-right .seat-wind { width: 1.5rem; height: 1.5rem; }
+    .player-panel.position-left .tile-back, .player-panel.position-right .tile-back { display: none; }
+    .player-panel.position-left .player-meta, .player-panel.position-right .player-meta { justify-content: center; margin: .05rem 0; line-height: 1; }
+    .player-panel.position-left .public-tiles,
+    .player-panel.position-right .public-tiles { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; }
+    .player-panel.position-left .public-tiles ::deep .mahjong-tile.compact,
+    .player-panel.position-right .public-tiles ::deep .mahjong-tile.compact { --tile-width: .85rem; --tile-height: 1.15rem; }
+    .player-panel.position-top .public-tiles ::deep .mahjong-tile.compact,
+    .player-panel.position-bottom .public-tiles ::deep .mahjong-tile.compact { --tile-width: 1.05rem; --tile-height: 1.45rem; }
+    .player-panel.position-bottom .seat-wind { width: 1.65rem; height: 1.65rem; }
+    .player-panel.position-bottom header { font-size: .8rem; }
+    .own-hand-heading { font-size: .65rem; }
+    .hand { min-height: 3rem; padding-top: .45rem; }
+    .position-bottom .hand ::deep .mahjong-tile { --tile-width: min(2.35rem, calc((100vw - 15rem) / 17)); --tile-height: min(3rem, calc((100vw - 15rem) / 12.2)); }
+}
+
+@media (min-width: 1101px) and (max-width: 1700px) and (max-height: 900px) {
     .public-tiles ::deep .mahjong-tile.compact { --tile-width: 1.4rem; --tile-height: 1.95rem; }
     .player-panel.position-left .player-meta,
     .player-panel.position-right .player-meta { margin: .2rem 0; }
@@ -65,7 +115,7 @@
     .public-tiles ::deep .mahjong-tile.compact { --tile-width: 1.6rem; --tile-height: 2.25rem; }
 }
 
-@media (min-width: 701px) and (max-height: 760px) {
+@media (min-width: 1101px) and (max-height: 760px) {
     .player-panel { padding: .45rem; }
     .player-panel.position-bottom .public-tiles { align-content: flex-start; }
     .public-tiles ::deep .mahjong-tile.compact { --tile-width: 1.4rem; --tile-height: 1.95rem; }

@@ -162,7 +162,11 @@ else
 
     private void SelectTile(TileDto tile) => _selectedTileId = _selectedTileId == tile.Id ? null : tile.Id;
     private Task ToggleReadyAsync() => RunCommandAsync(() => Connection.SetReadyAsync(!Me.IsReady));
-    private Task StartGameAsync() => RunCommandAsync(Connection.StartGameAsync);
+    private async Task StartGameAsync()
+    {
+        await RunCommandAsync(Connection.StartGameAsync);
+        await JavaScript.InvokeVoidAsync("window.scrollTo", 0, 0);
+    }
     private Task PassAsync() => RunCommandAsync(Connection.PassAsync);
     private Task ClaimPengAsync() => RunCommandAsync(Connection.ClaimPengAsync);
     private Task ClaimKongAsync() => RunCommandAsync(Connection.ClaimKongAsync);
