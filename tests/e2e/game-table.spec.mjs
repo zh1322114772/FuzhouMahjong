@@ -51,6 +51,14 @@ test('four players can see and use the same responsive table', async ({ browser 
       await expect(session.page.locator('.gold-status')).toBeInViewport();
       await expect(session.page.locator('.player-panel')).toHaveCount(4);
 
+      const toolbarAlignment = await session.page.evaluate(() => {
+        const roomCode = document.querySelector('.room-identity').getBoundingClientRect();
+        const connection = document.querySelector('.connection-banner').getBoundingClientRect();
+        const actions = document.querySelector('.header-actions').getBoundingClientRect();
+        return Math.max(roomCode.top, connection.top, actions.top) < Math.min(roomCode.bottom, connection.bottom, actions.bottom);
+      });
+      expect(toolbarAlignment, `${session.label} room details, connection, and actions should share one row`).toBeTruthy();
+
       const overflow = await session.page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, `${session.name} must not have horizontal page overflow`).toBeLessThanOrEqual(1);
       const handOverflow = await session.page.locator('.position-bottom .hand').evaluate(element =>
@@ -159,6 +167,11 @@ test('four players can see and use the same responsive table', async ({ browser 
         await playableTile.click();
         const discardButton = active.page.getByRole('button', { name: '打出', exact: true });
         await expect(discardButton).toBeEnabled();
+        const discardButtonBounds = await discardButton.boundingBox();
+        expect(discardButtonBounds, `${active.label} discard button should have a layout box`).toBeTruthy();
+        expect(discardButtonBounds.y, `${active.label} discard button top should be visible`).toBeGreaterThanOrEqual(0);
+        expect(discardButtonBounds.y + discardButtonBounds.height,
+          `${active.label} discard button should be fully visible`).toBeLessThanOrEqual(active.viewport.height);
         await discardButton.click();
       }
       discards++;
@@ -190,12 +203,12 @@ test('four players can see and use the same responsive table', async ({ browser 
       });
       expect(centerDelta.x, `${session.label} result dialog should be horizontally centered`).toBeLessThanOrEqual(2);
       expect(centerDelta.y, `${session.label} result dialog should be vertically centered`).toBeLessThanOrEqual(2);
-      const headerLinkAlignment = await session.page.evaluate(() => {
-        const header = document.querySelector('.site-header').getBoundingClientRect();
-        const link = document.querySelector('.header-link').getBoundingClientRect();
-        return (link.left - header.left) / header.width;
+      const headerActionsAlignment = await session.page.evaluate(() => {
+        const header = document.querySelector('.room-header').getBoundingClientRect();
+        const actions = document.querySelector('.header-actions').getBoundingClientRect();
+        return (actions.left - header.left) / header.width;
       });
-      expect(headerLinkAlignment, `${session.label} rules link should stay on the right`).toBeGreaterThan(0.7);
+      expect(headerActionsAlignment, `${session.label} room actions should stay on the right`).toBeGreaterThan(0.7);
     }
 
     for (const session of sessions) {

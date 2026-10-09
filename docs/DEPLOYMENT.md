@@ -56,6 +56,28 @@ The health response should be `{"status":"ok"}`. Also create a test room in a
 browser and verify the connection banner becomes connected; a plain HTTP health
 check does not exercise SignalR/WebSocket traffic.
 
+## Visual Studio folder publish
+
+Publish `ProjectMahjong.Server`, not `ProjectMahjong.Client`. The server publish
+contains the executable, API, SignalR hub, and client files under `wwwroot`.
+
+Stop any copy running from the destination before publishing because Windows
+locks the server DLL. If upgrading from a build that used fingerprinted Blazor
+boot files, run **Build > Clean Solution** once before publishing so obsolete
+framework files are removed.
+
+After publishing, these two paths must agree:
+
+```text
+wwwroot/index.html -> _framework/blazor.webassembly.js
+wwwroot/_framework/blazor.webassembly.js
+```
+
+The literal marker `#[.{fingerprint}]` must not appear in the published
+`index.html`. If a browser was open on the previous broken PWA, close all tabs
+for the site and reopen it, or unregister its Service Worker and clear site
+storage once.
+
 ## Release/update procedure
 
 Every restart destroys active rooms, so coordinate a maintenance window between

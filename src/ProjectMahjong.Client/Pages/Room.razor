@@ -23,19 +23,18 @@ else
 {
     <main class="room-page">
         <header class="room-header">
-            <div>
+            <div class="room-identity">
                 <span class="small-label">房间号</span>
                 <strong class="room-code">@RoomCode.ToUpperInvariant()</strong>
+            </div>
+            <div class="connection-banner @ConnectionClass" role="status">
+                <span class="status-dot"></span>@ConnectionText
             </div>
             <div class="header-actions">
                 <button class="button quiet" @onclick="CopyInviteAsync">复制邀请链接</button>
                 <a class="button quiet" href="/rules" target="_blank">规则</a>
             </div>
         </header>
-
-        <div class="connection-banner @ConnectionClass" role="status">
-            <span class="status-dot"></span>@ConnectionText
-        </div>
 
         @if (!string.IsNullOrWhiteSpace(Connection.Error))
         {

@@ -1,13 +1,13 @@
 .room-page { max-width: 120rem; margin: 0 auto; padding: 1rem; }
-.room-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .75rem; }
+.room-header { display: grid; grid-template-columns: minmax(9rem, auto) minmax(12rem, 1fr) auto; align-items: center; gap: 1rem; margin-bottom: .75rem; }
 .room-code { display: block; font-size: 1.7rem; letter-spacing: .15em; }
 .small-label { color: var(--muted); font-size: .85rem; }
 .header-actions { display: flex; gap: .5rem; }
-.connection-banner { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .45rem; border-radius: .55rem; margin-bottom: .75rem; background: #fff1d6; color: #744c00; }
+.connection-banner { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2rem; padding: .35rem .6rem; border-radius: .55rem; background: #fff1d6; color: #744c00; }
 .connection-banner.connected { background: #daf3df; color: #205c2e; }
 .status-dot { width: .65rem; height: .65rem; border-radius: 50%; background: currentColor; }
 
-.table-grid { position: relative; height: clamp(35rem, calc(100dvh - 17rem), 48rem); display: grid; grid-template-columns: minmax(10rem, .75fr) minmax(24rem, 2.5fr) minmax(10rem, .75fr); grid-template-rows: 9rem minmax(6rem, 1fr) 15rem auto; gap: .55rem; padding: .7rem; overflow: hidden; border: .55rem solid #154c34; border-radius: 1.3rem; background: radial-gradient(circle at center, #31805b 0 13%, #286e4e 58%, #205d42 100%); box-shadow: inset 0 0 2.5rem rgb(0 0 0 / 24%), var(--shadow-lg); }
+.table-grid { position: relative; height: clamp(32rem, calc(100dvh - 12rem), 48rem); display: grid; grid-template-columns: minmax(10rem, .75fr) minmax(24rem, 2.5fr) minmax(10rem, .75fr); grid-template-rows: 9rem minmax(6rem, 1fr) 15rem auto; gap: .55rem; padding: .7rem; overflow: hidden; border: .55rem solid #154c34; border-radius: 1.3rem; background: radial-gradient(circle at center, #31805b 0 13%, #286e4e 58%, #205d42 100%); box-shadow: inset 0 0 2.5rem rgb(0 0 0 / 24%), var(--shadow-lg); }
 
 .center-message { min-height: 60dvh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 2rem; }
 .center-message.card { max-width: 30rem; min-height: auto; margin: 5rem auto; }
@@ -16,8 +16,11 @@
 
 @media (max-width: 700px) {
     .room-page { padding: .55rem; }
-    .room-header { align-items: flex-start; }
+    .room-header { grid-template-columns: auto minmax(5.5rem, 1fr) auto; align-items: center; gap: .4rem; }
+    .room-code { font-size: 1.25rem; }
+    .connection-banner { padding: .3rem .4rem; font-size: .75rem; }
     .header-actions { flex-direction: column; }
+    .header-actions .button { min-height: 2.25rem; padding: .3rem .45rem; font-size: .72rem; }
     .table-grid { height: 43rem; grid-template-columns: 5.2rem minmax(9rem, 1fr) 5.2rem; grid-template-rows: 7.3rem minmax(8rem, 1fr) 11.5rem auto; gap: .35rem; padding: .35rem; border-width: .35rem; }
 }
 
@@ -26,7 +29,11 @@
 }
 
 @media (min-width: 701px) and (max-height: 760px) {
-    .connection-banner { margin-bottom: .35rem; padding: .25rem; font-size: .82rem; }
+    .room-page { padding-top: .55rem; padding-bottom: .55rem; }
     .room-header { margin-bottom: .35rem; }
-    .table-grid { height: 38.5rem; min-height: 38.5rem; grid-template-rows: 8rem minmax(14rem, 1fr) 11rem auto; }
+    .room-identity { display: flex; align-items: baseline; gap: .5rem; }
+    .room-code { font-size: 1.45rem; }
+    .header-actions .button { min-height: 2.4rem; padding: .35rem .75rem; }
+    .connection-banner { padding: .25rem; font-size: .82rem; }
+    .table-grid { height: calc(100dvh - 8.25rem); min-height: 31rem; grid-template-rows: 8rem minmax(6rem, 1fr) 11rem auto; }
 }

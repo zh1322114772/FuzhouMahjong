@@ -4,7 +4,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
     <ProjectReference Include="..\ProjectMahjong.Contracts\ProjectMahjong.Contracts.csproj" />
     <ProjectReference Include="..\ProjectMahjong.Game\ProjectMahjong.Game.csproj" />
-    <ProjectReference Include="..\ProjectMahjong.Client\ProjectMahjong.Client.csproj" />
+    <ProjectReference Include="..\ProjectMahjong.Client\ProjectMahjong.Client.csproj"
+                      GlobalPropertiesToRemove="PublishProfile" />
   </ItemGroup>
 
   <PropertyGroup>
