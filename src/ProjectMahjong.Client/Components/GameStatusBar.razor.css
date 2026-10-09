@@ -1,0 +1,9 @@
+.game-status { position: sticky; top: .35rem; z-index: 12; display: grid; grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(8rem, 1fr)); gap: .75rem; padding: .6rem .85rem; margin-bottom: .65rem; box-shadow: 0 .3rem 1rem rgb(0 0 0 / 14%); }
+.game-status div { display: flex; justify-content: space-between; gap: .5rem; }
+.game-status span { color: var(--muted); }
+.game-status .gold-status { align-items: center; justify-content: space-between; padding: .15rem .45rem; border: 2px solid #e5b532; border-radius: .65rem; background: #fff8d8; }
+
+@media (max-width: 700px) {
+    .game-status { top: .2rem; grid-template-columns: 1fr 1fr; gap: .35rem; padding: .45rem; font-size: .82rem; }
+    .game-status > div:first-child { grid-column: 1 / 3; }
+}

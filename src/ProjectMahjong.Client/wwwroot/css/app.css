@@ -1,0 +1,63 @@
+:root {
+    --ink: #17382b;
+    --accent: #b74935;
+    --accent-dark: #843225;
+    --gold: #e4ad31;
+    --success: #267a45;
+    --surface: #fffdf7;
+    --surface-soft: #f1ede1;
+    --border: #d7d0bf;
+    --muted: #686c65;
+    --shadow-lg: 0 12px 35px rgb(31 47 38 / 18%);
+    color-scheme: light;
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; background: #e9eee8; }
+body { margin: 0; color: #202820; background: radial-gradient(circle at top, #f8f4e8 0, #e8eee8 70%); }
+button, input { font: inherit; }
+button, a { touch-action: manipulation; }
+a { color: inherit; }
+h1, h2, h3 { color: #18382b; }
+
+input {
+    min-height: 3.25rem;
+    padding: .7rem .85rem;
+    border: 2px solid var(--border);
+    border-radius: .65rem;
+    background: white;
+    color: #202820;
+}
+
+input:focus, button:focus-visible, a:focus-visible {
+    outline: 3px solid rgb(228 173 49 / 50%);
+    outline-offset: 2px;
+}
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow-lg); }
+.button { min-height: 3rem; display: inline-flex; justify-content: center; align-items: center; gap: .35rem; padding: .65rem 1rem; border: 0; border-radius: .65rem; cursor: pointer; font-weight: 800; text-decoration: none; }
+.button.large { min-height: 3.4rem; font-size: 1.05rem; }
+.button.primary { color: white; background: var(--accent); }
+.button.secondary { color: white; background: var(--ink); }
+.button.danger { color: white; background: #a52d28; }
+.button.gold { color: #302000; background: var(--gold); }
+.button.quiet { color: var(--ink); background: #eeeadd; border: 1px solid var(--border); }
+.button:disabled, button:disabled { cursor: not-allowed; opacity: .48; }
+.alert { padding: .8rem 1rem; margin: .75rem 0; border-left: 5px solid #b5382f; border-radius: .4rem; background: #fbe4df; color: #74251f; }
+.muted { color: var(--muted); }
+.eyebrow { color: var(--accent); font-weight: 850; letter-spacing: .12em; }
+
+#blazor-error-ui { display: none; position: fixed; inset: auto 0 0; z-index: 1000; padding: 1rem 3rem 1rem 1rem; background: #fff0c9; color: #593c00; box-shadow: 0 -2px 8px rgb(0 0 0 / 20%); }
+#blazor-error-ui .dismiss { position: absolute; right: 1rem; cursor: pointer; }
+.blazor-error-boundary { padding: 1rem; background: #922f28; color: white; }
+.blazor-error-boundary::after { content: "页面发生错误，请刷新后重试。"; }
+.loading-progress { position: absolute; display: block; width: 8rem; height: 8rem; inset: 20vh 0 auto; margin: auto; }
+.loading-progress circle { fill: none; stroke: #d8d2c2; stroke-width: .6rem; transform-origin: 50% 50%; transform: rotate(-90deg); }
+.loading-progress circle:last-child { stroke: var(--accent); stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * .8), 500%; transition: stroke-dasharray .05s ease-in-out; }
+.loading-progress-text { position: absolute; text-align: center; font-weight: 800; inset: calc(20vh + 3.25rem) 0 auto; }
+.loading-progress-text::after { content: "正在加载 " var(--blazor-load-percentage-text, ""); }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

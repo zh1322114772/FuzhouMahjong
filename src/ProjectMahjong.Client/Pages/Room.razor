@@ -1,0 +1,242 @@
+@page "/room/{RoomCode}"
+@implements IAsyncDisposable
+@inject GameConnection Connection
+@inject SessionStorage Sessions
+@inject NavigationManager Navigation
+@inject IJSRuntime JavaScript
+
+<PageTitle>房间 @RoomCode - 福州麻将</PageTitle>
+
+@if (_loading)
+{
+    <div class="center-message"><div class="spinner"></div><p>正在进入房间…</p></div>
+}
+else if (_session is null)
+{
+    <div class="center-message card">
+        <h1>找不到座位</h1>
+        <p>请通过邀请链接重新加入房间。</p>
+        <a class="button primary" href="/join/@RoomCode">重新加入</a>
+    </div>
+}
+else
+{
+    <main class="room-page">
+        <header class="room-header">
+            <div>
+                <span class="small-label">房间号</span>
+                <strong class="room-code">@RoomCode.ToUpperInvariant()</strong>
+            </div>
+            <div class="header-actions">
+                <button class="button quiet" @onclick="CopyInviteAsync">复制邀请链接</button>
+                <a class="button quiet" href="/rules" target="_blank">规则</a>
+            </div>
+        </header>
+
+        <div class="connection-banner @ConnectionClass" role="status">
+            <span class="status-dot"></span>@ConnectionText
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Connection.Error))
+        {
+            <div class="alert" role="alert">@Connection.Error</div>
+        }
+
+        @if (Snapshot is null)
+        {
+            <div class="center-message"><div class="spinner"></div><p>正在同步牌桌…</p></div>
+        }
+        else if (Snapshot.Stage == RoomStage.Lobby)
+        {
+            <RoomLobby Snapshot="Snapshot"
+                       Me="Me"
+                       CanStartGame="CanStartGame"
+                       CommandPending="_commandPending"
+                       OnToggleReady="ToggleReadyAsync"
+                       OnStartGame="StartGameAsync" />
+        }
+        else
+        {
+            <GameStatusBar Snapshot="Snapshot" />
+
+            <section class="table-grid">
+                @foreach (var player in Snapshot.Players.OrderBy(player => player.Seat))
+                {
+                    <PlayerPanel Player="player"
+                                 CurrentPlayerId="Snapshot.CurrentPlayerId"
+                                 IsCurrentTurn="@(player.Seat == Snapshot.CurrentTurn)"
+                                 Position="@SeatPosition(player.Seat)"
+                                 MyHand="Snapshot.MyHand"
+                                 DrawnTileId="Snapshot.MyDrawnTileId"
+                                 GoldTile="Snapshot.GoldTile"
+                                 SelectedTileId="_selectedTileId"
+                                 CanDiscard="Snapshot.AvailableActions.CanDiscard"
+                                 CommandPending="_commandPending"
+                                 OnTileSelected="SelectTile"
+                                 OnTileDoubleClick="DiscardTileAsync" />
+                }
+
+                <LastDiscardPanel Snapshot="Snapshot" ClaimSecondsRemaining="ClaimSecondsRemaining" />
+
+                @if (HasAvailableActions)
+                {
+                    <GameActionBar Snapshot="Snapshot"
+                                   SelectedTileId="_selectedTileId"
+                                   CommandPending="_commandPending"
+                                   OnDiscard="DiscardAsync"
+                                   OnHu="HuAsync"
+                                   OnPeng="ClaimPengAsync"
+                                   OnExposedKong="ClaimKongAsync"
+                                   OnPass="PassAsync"
+                                   OnChi="ClaimChiAsync"
+                                   OnConcealedKong="ConcealedKongAsync"
+                                   OnAddedKong="AddedKongAsync" />
+                }
+
+                @if (Snapshot.HandResult is not null)
+                {
+                    <GameResultDialog Result="Snapshot.HandResult"
+                                      Stage="Snapshot.Stage"
+                                      IsHost="Me.IsHost"
+                                      CommandPending="_commandPending"
+                                      OnContinue="ContinueAsync" />
+                }
+            </section>
+        }
+    </main>
+}
+
+@code {
+    [Parameter] public string RoomCode { get; set; } = string.Empty;
+
+    private PlayerSessionDto? _session;
+    private int? _selectedTileId;
+    private bool _loading = true;
+    private bool _commandPending;
+    private readonly CancellationTokenSource _clockCancellation = new();
+
+    private RoomSnapshotDto? Snapshot => Connection.Snapshot;
+    private SeatSnapshotDto Me => Snapshot!.Players.Single(player => player.PlayerId == Snapshot.CurrentPlayerId);
+    private bool CanStartGame => Snapshot!.Players.Where(player => !player.IsBot).All(player => player.IsReady);
+    private bool HasAvailableActions => Snapshot is not null &&
+        (Snapshot.AvailableActions.CanDiscard ||
+         Snapshot.AvailableActions.CanPass ||
+         Snapshot.AvailableActions.CanHu ||
+         Snapshot.AvailableActions.CanPeng ||
+         Snapshot.AvailableActions.CanExposedKong ||
+         Snapshot.AvailableActions.ChiOptions.Count > 0 ||
+         Snapshot.AvailableActions.ConcealedKongOptions.Count > 0 ||
+         Snapshot.AvailableActions.AddedKongOptions.Count > 0);
+    private int ClaimSecondsRemaining => Snapshot?.ClaimDeadlineUtc is not { } deadline
+        ? 0
+        : Math.Max(0, (int)Math.Ceiling((deadline - DateTimeOffset.UtcNow).TotalSeconds));
+    private string ConnectionClass => Connection.Status == GameConnectionStatus.Connected ? "connected" : "disconnected";
+    private string ConnectionText => Connection.Status switch
+    {
+        GameConnectionStatus.Connected => "网络已连接",
+        GameConnectionStatus.Connecting => "正在连接…",
+        GameConnectionStatus.Reconnecting => "网络中断，正在自动重连…",
+        _ => "网络已断开，请刷新页面"
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _session = await Sessions.LoadAsync(RoomCode);
+        _loading = false;
+        if (_session is not null)
+        {
+            Connection.Changed += HandleConnectionChanged;
+            await Connection.StartAsync(_session);
+            _ = RunClockAsync(_clockCancellation.Token);
+        }
+        StateHasChanged();
+    }
+
+    private void HandleConnectionChanged()
+    {
+        if (Snapshot is not null && _selectedTileId is int selected && Snapshot.MyHand.All(tile => tile.Id != selected))
+            _selectedTileId = null;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectTile(TileDto tile) => _selectedTileId = _selectedTileId == tile.Id ? null : tile.Id;
+    private Task ToggleReadyAsync() => RunCommandAsync(() => Connection.SetReadyAsync(!Me.IsReady));
+    private Task StartGameAsync() => RunCommandAsync(Connection.StartGameAsync);
+    private Task PassAsync() => RunCommandAsync(Connection.PassAsync);
+    private Task ClaimPengAsync() => RunCommandAsync(Connection.ClaimPengAsync);
+    private Task ClaimKongAsync() => RunCommandAsync(Connection.ClaimKongAsync);
+    private Task ClaimChiAsync(string optionId) => RunCommandAsync(() => Connection.ClaimChiAsync(optionId));
+    private Task ConcealedKongAsync(int tileId) => RunCommandAsync(() => Connection.ConcealedKongAsync(tileId));
+    private Task AddedKongAsync(int tileId) => RunCommandAsync(() => Connection.AddedKongAsync(tileId));
+
+    private Task HuAsync() => RunCommandAsync(
+        Snapshot!.Stage == RoomStage.WaitingForClaims ? Connection.ClaimHuAsync : Connection.SelfDrawnWinAsync);
+
+    private Task DiscardAsync()
+    {
+        var tileId = _selectedTileId ?? throw new InvalidOperationException("No tile is selected.");
+        var tile = Snapshot!.MyHand.Single(candidate => candidate.Id == tileId);
+        return DiscardTileAsync(tile);
+    }
+
+    private Task DiscardTileAsync(TileDto tile)
+    {
+        if (Snapshot?.AvailableActions.CanDiscard != true || _commandPending)
+            return Task.CompletedTask;
+
+        _selectedTileId = tile.Id;
+        return RunCommandAsync(() => Connection.DiscardAsync(tile.Id));
+    }
+
+    private Task ContinueAsync() => RunCommandAsync(
+        Snapshot!.Stage == RoomStage.MatchEnded ? Connection.StartRematchAsync : Connection.StartNextHandAsync);
+
+    private async Task RunCommandAsync(Func<Task<CommandReplyDto>> command)
+    {
+        if (_commandPending) return;
+        _commandPending = true;
+        await command();
+        _commandPending = false;
+    }
+
+    private async Task CopyInviteAsync()
+    {
+        var url = Navigation.ToAbsoluteUri($"/join/{RoomCode}").ToString();
+        await JavaScript.InvokeVoidAsync("navigator.clipboard.writeText", url);
+    }
+
+    private string SeatPosition(Seat seat) => (((int)seat - (int)Me.Seat + 4) % 4) switch
+    {
+        0 => "bottom",
+        1 => "right",
+        2 => "top",
+        _ => "left"
+    };
+
+    private async Task RunClockAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Normal component disposal.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _clockCancellation.CancelAsync();
+        _clockCancellation.Dispose();
+        Connection.Changed -= HandleConnectionChanged;
+        await Connection.StopAsync();
+    }
+}
+

@@ -1,0 +1,35 @@
+<div class="result-overlay">
+    <section class="result-card card" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <p class="eyebrow">本局结果</p>
+        <h2 id="result-title">@Result.Summary</h2>
+        @if (!Result.WasDraw)
+        {
+            <p>基本计分：@Result.HandPoints 分</p>
+            <ul>@foreach (var item in Result.ScoreItems) { <li>@item</li> }</ul>
+            <div class="payments">
+                @foreach (var payment in Result.Payments)
+                {
+                    <span>@payment.PlayerName：@(payment.Amount > 0 ? "+" : string.Empty)@payment.Amount</span>
+                }
+            </div>
+        }
+        @if (IsHost)
+        {
+            <button class="button primary large" disabled="@CommandPending" @onclick="OnContinue">
+                @(Stage == RoomStage.MatchEnded ? "再来一场" : "开始下一局")
+            </button>
+        }
+        else
+        {
+            <p class="muted">等待房主继续。</p>
+        }
+    </section>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public HandResultDto Result { get; set; } = default!;
+    [Parameter] public RoomStage Stage { get; set; }
+    [Parameter] public bool IsHost { get; set; }
+    [Parameter] public bool CommandPending { get; set; }
+    [Parameter] public EventCallback OnContinue { get; set; }
+}

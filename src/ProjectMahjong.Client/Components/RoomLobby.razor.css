@@ -1,0 +1,18 @@
+.lobby { max-width: 46rem; margin: 2rem auto; padding: clamp(1rem, 4vw, 2.5rem); }
+.lobby h1 { margin-top: 0; }
+.seat-list { display: grid; gap: .65rem; margin: 1.5rem 0; }
+.seat-row { min-height: 4rem; display: grid; grid-template-columns: 3rem minmax(7rem, 1fr) auto auto auto; align-items: center; gap: .7rem; padding: .6rem .8rem; background: var(--surface-soft); border-radius: .7rem; }
+.seat-row.empty { display: flex; color: var(--muted); border: 1px dashed var(--border); background: transparent; }
+.seat-wind { width: 2.3rem; height: 2.3rem; display: inline-grid; place-items: center; background: var(--ink); color: white; border-radius: 50%; font-weight: 800; }
+.badge { padding: .2rem .45rem; background: #efe5c5; border-radius: .35rem; font-size: .8rem; }
+.bot-badge { color: #fff; background: #356c89; }
+.bot-symbol { width: 2rem; height: 2rem; display: inline-grid; place-items: center; border-radius: 50%; background: #dce9ee; color: #28586f; }
+.presence, .ready-state { color: var(--muted); font-size: .9rem; }
+.presence.online, .ready-state.ready { color: var(--success); font-weight: 750; }
+.lobby-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+@media (max-width: 700px) {
+    .seat-row { grid-template-columns: 2.5rem 1fr auto; }
+    .seat-row .presence { display: none; }
+    .lobby-actions { grid-template-columns: 1fr; }
+}

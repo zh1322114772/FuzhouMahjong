@@ -1,0 +1,53 @@
+<section class="lobby card">
+    <h1>等待开桌</h1>
+    <p>真人准备后即可开始，空位会由电脑补上。</p>
+
+    <div class="seat-list">
+        @foreach (var player in Snapshot.Players.OrderBy(player => player.Seat))
+        {
+            <div class="seat-row">
+                <span class="seat-wind">@GameUi.SeatName(player.Seat)</span>
+                <strong>@player.DisplayName</strong>
+                @if (player.IsHost) { <span class="badge">房主</span> }
+                @if (player.IsBot)
+                {
+                    <span class="badge bot-badge" title="电脑玩家">电脑</span>
+                }
+                else
+                {
+                    <span class="presence @(player.IsConnected ? "online" : string.Empty)">
+                        @(player.IsConnected ? "在线" : "离线")
+                    </span>
+                }
+                <span class="ready-state @(player.IsReady ? "ready" : string.Empty)">
+                    @(player.IsReady ? "已准备" : "未准备")
+                </span>
+            </div>
+        }
+        @for (var seat = Snapshot.Players.Count; seat < 4; seat++)
+        {
+            <div class="seat-row empty"><span class="bot-symbol">♟</span> 等待玩家 · 开局后电脑补位</div>
+        }
+    </div>
+
+    <div class="lobby-actions">
+        <button class="button secondary large" disabled="@CommandPending" @onclick="OnToggleReady">
+            @(Me.IsReady ? "取消准备" : "我准备好了")
+        </button>
+        @if (Me.IsHost)
+        {
+            <button class="button primary large" disabled="@(!CanStartGame || CommandPending)" @onclick="OnStartGame">
+                🀄 开始
+            </button>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public RoomSnapshotDto Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public SeatSnapshotDto Me { get; set; } = default!;
+    [Parameter] public bool CanStartGame { get; set; }
+    [Parameter] public bool CommandPending { get; set; }
+    [Parameter] public EventCallback OnToggleReady { get; set; }
+    [Parameter] public EventCallback OnStartGame { get; set; }
+}

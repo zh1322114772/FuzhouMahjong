@@ -1,0 +1,7 @@
+.rules-page { max-width: 52rem; margin: 2rem auto; padding: clamp(1.2rem, 4vw, 3rem); line-height: 1.75; }
+.rules-page h1 { line-height: 1.2; }
+.rules-page h2 { margin-top: 2rem; color: var(--accent-dark); }
+.rules-page li { margin: .45rem 0; }
+.intro { color: var(--muted); font-size: 1.05rem; }
+.formula { padding: 1rem; border-left: 5px solid var(--gold); background: var(--surface-soft); font-weight: 800; }
+.back-link { color: var(--accent-dark); }

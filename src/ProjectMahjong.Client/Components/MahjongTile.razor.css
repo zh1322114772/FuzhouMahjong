@@ -1,0 +1,75 @@
+.mahjong-tile {
+    --tile-width: 3.7rem;
+    --tile-height: 5.15rem;
+    position: relative;
+    width: var(--tile-width);
+    height: var(--tile-height);
+    flex: 0 0 auto;
+    padding: .13rem .14rem .32rem;
+    border: 1px solid #d8cdb6;
+    border-bottom: .34rem solid #d3c29c;
+    border-radius: .48rem .48rem .4rem .4rem;
+    background: linear-gradient(145deg, #fffdf4 0%, #faf4e4 58%, #eee1c9 100%);
+    box-shadow: inset .14rem .12rem rgb(255 255 255 / 92%), inset -.13rem -.12rem rgb(125 96 55 / 13%), 0 .16rem .22rem rgb(0 0 0 / 28%);
+    user-select: none;
+    touch-action: manipulation;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.mahjong-tile::after {
+    content: "";
+    position: absolute;
+    inset: .15rem;
+    border: 1px solid rgb(151 118 63 / 9%);
+    border-radius: .3rem;
+    pointer-events: none;
+}
+
+.mahjong-tile:not(:disabled):active { transform: translateY(2px); }
+.mahjong-tile.selected { transform: translateY(-.7rem); box-shadow: 0 0 0 4px #f1b83d, 0 .35rem .65rem rgb(0 0 0 / 32%); }
+.mahjong-tile.gold-tile { border-color: #d29c20; border-bottom-color: #ba7b13; box-shadow: inset .14rem .12rem rgb(255 255 255 / 90%), inset -.13rem -.12rem rgb(127 110 78 / 15%), 0 0 0 3px #ffd85a, 0 0 1rem rgb(255 207 52 / 78%); }
+.mahjong-tile.gold-tile::before { content: "金"; position: absolute; z-index: 3; top: -.42rem; right: -.42rem; width: 1.35rem; height: 1.35rem; display: grid; place-items: center; border: 2px solid #fff3b5; border-radius: 50%; color: #fff; background: #c62828; font-size: .72rem; font-weight: 900; box-shadow: 0 2px 5px rgb(0 0 0 / 35%); }
+.mahjong-tile.gold-tile.selected { box-shadow: 0 0 0 5px #ffb300, 0 0 1.25rem rgb(255 196 0 / 90%); }
+.mahjong-tile:disabled { opacity: 1; }
+.mahjong-tile.compact { --tile-width: 2.15rem; --tile-height: 3rem; padding: .05rem .06rem .17rem; border-bottom-width: .2rem; border-radius: .3rem; }
+.tile-face { display: block; width: 100%; height: 100%; overflow: visible; }
+.glyph-face { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: "FZKai-Z03", "KaiTi", "STKaiti", "Microsoft YaHei", serif; font-weight: 900; line-height: 1; text-shadow: .4px .4px 0 currentColor; }
+.character-face { flex-direction: column; justify-content: flex-start; padding-top: 11px; }
+.number-character { color: #151b1b; font-size: 30px; }
+.wan-character { color: #c31f2d; font-size: 25px; }
+.honor-character { font-size: 43px; }
+.wind-character { color: #151b1b; }
+.red-dragon { color: #c31f2d; }
+.green-dragon { color: #315c3a; }
+.white-dragon { fill: none; stroke: #151b1b; stroke-width: 4.5; }
+.dot-pip .dot-outer { fill: #fffaf0; stroke: var(--dot-color); stroke-width: 2.5; }
+.dot-pip .dot-inner { fill: none; stroke: var(--dot-color); stroke-width: 1.45; }
+.dot-pip .dot-core { fill: var(--dot-color); }
+.one-dot-outline { fill: #fffaf0; stroke: #182121; stroke-width: 2.2; }
+.one-dot-field { fill: #fffaf0; stroke: #315c3a; stroke-width: 1.5; }
+.one-dot path { fill: #315c3a; stroke: #24452d; stroke-width: .35; }
+.one-dot path:nth-of-type(3n) { fill: #c31f2d; stroke: #9e1723; }
+.one-dot-center-ring { fill: #fffaf0; stroke: #c31f2d; stroke-width: 2.2; }
+.one-dot-center { fill: #fffaf0; stroke: #315c3a; stroke-width: 1.6; }
+.one-dot-core { fill: #c31f2d; }
+.flower-character { color: #315c3a; font-size: 27px; }
+.flower-art circle { fill: #c73555; }
+.flower-art .flower-center { fill: #e8b62d; }
+.sparrow path { stroke-linecap: round; stroke-linejoin: round; }
+.sparrow .bird-body, .sparrow .bird-head { fill: #f7f0dd; stroke: #315c3a; stroke-width: 3; }
+.sparrow .bird-wing { fill: none; stroke: #315c3a; stroke-width: 2.8; }
+.sparrow .bird-neck, .sparrow .bird-crown, .sparrow .bird-tail { fill: none; stroke: #315c3a; stroke-width: 2.6; }
+.sparrow .bird-eye { fill: #c31f2d; stroke: #8e1720; stroke-width: .45; }
+.sparrow .bird-beak { fill: #c31f2d; stroke: #8e1720; stroke-width: 1.1; }
+.sparrow .bird-feet { fill: none; stroke: #315c3a; stroke-width: 1.7; }
+.bamboo-body { fill: var(--bamboo-color); fill-rule: evenodd; stroke: #1e3525; stroke-width: 1.1; stroke-linejoin: round; }
+.bamboo-core { fill: #fff4df; }
+.eight-bamboo path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.eight-bamboo-outline { stroke: #1e3525; stroke-width: 11; }
+.eight-bamboo-body { stroke: #31543a; stroke-width: 8.5; }
+.eight-bamboo-core { stroke: #fff4df; stroke-width: 2.25; }
+
+@media (max-width: 560px) {
+    .mahjong-tile { --tile-width: 3rem; --tile-height: 4.25rem; }
+    .mahjong-tile.compact { --tile-width: 1.85rem; --tile-height: 2.6rem; }
+}

@@ -1,0 +1,15 @@
+.home-shell { min-height: calc(100dvh - 4.5rem); display: grid; place-items: center; padding: 1.5rem; }
+.hero-card { width: min(100%, 32rem); padding: clamp(1.5rem, 5vw, 3rem); border-radius: 1.25rem; background: var(--surface); box-shadow: var(--shadow-lg); }
+.eyebrow { margin: 0 0 .35rem; color: var(--accent); font-weight: 800; letter-spacing: .12em; }
+h1 { margin: 0; font-size: clamp(2.5rem, 10vw, 4.5rem); }
+.lead { color: var(--muted); font-size: 1.15rem; margin: .6rem 0 2rem; }
+label { display: block; margin: 1rem 0 .45rem; font-weight: 750; }
+input { width: 100%; }
+.button { width: 100%; margin-top: 1rem; }
+.room-code-input { text-transform: uppercase; letter-spacing: .25em; font-size: 1.35rem; font-weight: 800; }
+.divider { display: flex; align-items: center; gap: .75rem; color: var(--muted); margin: 1.5rem 0 .5rem; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.invite-box { background: var(--surface-soft); padding: 1rem; border-radius: .7rem; margin-top: 1rem; text-align: center; }
+.invite-box strong { font-size: 1.4rem; letter-spacing: .14em; }
+.resume-button { width: 100%; margin-top: 1.25rem; background: transparent; border: 1px dashed var(--accent); color: var(--accent-dark); }
+.rules-link, .text-link { display: block; text-align: center; margin-top: 1.25rem; color: var(--accent-dark); }

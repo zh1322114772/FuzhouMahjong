@@ -1,0 +1,20 @@
+<section class="game-status card">
+    <div><span>第 @Snapshot.HandNumber / @Snapshot.TotalHands 局</span><strong>@Snapshot.StatusMessage</strong></div>
+    <div><span>庄家</span><strong>@GameUi.SeatName(Snapshot.Dealer)</strong></div>
+    <div class="gold-status">
+        <span>金</span>
+        @if (Snapshot.GoldTile is not null)
+        {
+            <MahjongTile Tile="Snapshot.GoldTile" Compact="true" Disabled="true" IsGold="true" />
+        }
+        else
+        {
+            <strong>未开</strong>
+        }
+    </div>
+    <div><span>牌墙</span><strong>@Snapshot.TilesRemaining 张</strong></div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public RoomSnapshotDto Snapshot { get; set; } = default!;
+}

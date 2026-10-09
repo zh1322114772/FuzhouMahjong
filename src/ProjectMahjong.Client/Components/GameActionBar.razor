@@ -1,0 +1,70 @@
+<section class="action-bar" aria-label="可用操作">
+    @if (SelectedTileIsGold)
+    {
+        <span class="gold-warning">⚠ 打出金后，本局只能自摸</span>
+    }
+    @if (Snapshot.AvailableActions.CanDiscard)
+    {
+        <button class="button danger large" disabled="@(SelectedTileId is null || CommandPending)" @onclick="OnDiscard">打出</button>
+    }
+    @if (Snapshot.AvailableActions.CanHu)
+    {
+        <button class="button gold large" disabled="@CommandPending" @onclick="OnHu">和牌</button>
+    }
+    @if (Snapshot.AvailableActions.CanPeng)
+    {
+        <button class="button secondary large" disabled="@CommandPending" @onclick="OnPeng">碰</button>
+    }
+    @if (Snapshot.AvailableActions.CanExposedKong)
+    {
+        <button class="button secondary large" disabled="@CommandPending" @onclick="OnExposedKong">杠</button>
+    }
+    @foreach (var chi in Snapshot.AvailableActions.ChiOptions)
+    {
+        <div class="action-choice">
+            <div class="choice-tiles">
+                @foreach (var tile in chi.TilesFromHand)
+                {
+                    <MahjongTile Tile="tile" Compact="true" Disabled="true" IsGold="@IsGold(tile)" />
+                }
+            </div>
+            <button class="button secondary large" disabled="@CommandPending" @onclick="() => OnChi.InvokeAsync(chi.Id)">吃</button>
+        </div>
+    }
+    @foreach (var tile in Snapshot.AvailableActions.ConcealedKongOptions)
+    {
+        <div class="action-choice">
+            <MahjongTile Tile="tile" Compact="true" Disabled="true" IsGold="@IsGold(tile)" />
+            <button class="button secondary large" disabled="@CommandPending" @onclick="() => OnConcealedKong.InvokeAsync(tile.Id)">暗杠</button>
+        </div>
+    }
+    @foreach (var tile in Snapshot.AvailableActions.AddedKongOptions)
+    {
+        <div class="action-choice">
+            <MahjongTile Tile="tile" Compact="true" Disabled="true" IsGold="@IsGold(tile)" />
+            <button class="button secondary large" disabled="@CommandPending" @onclick="() => OnAddedKong.InvokeAsync(tile.Id)">补杠</button>
+        </div>
+    }
+    @if (Snapshot.AvailableActions.CanPass)
+    {
+        <button class="button quiet large" disabled="@CommandPending" @onclick="OnPass">过</button>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public RoomSnapshotDto Snapshot { get; set; } = default!;
+    [Parameter] public int? SelectedTileId { get; set; }
+    [Parameter] public bool CommandPending { get; set; }
+    [Parameter] public EventCallback OnDiscard { get; set; }
+    [Parameter] public EventCallback OnHu { get; set; }
+    [Parameter] public EventCallback OnPeng { get; set; }
+    [Parameter] public EventCallback OnExposedKong { get; set; }
+    [Parameter] public EventCallback OnPass { get; set; }
+    [Parameter] public EventCallback<string> OnChi { get; set; }
+    [Parameter] public EventCallback<int> OnConcealedKong { get; set; }
+    [Parameter] public EventCallback<int> OnAddedKong { get; set; }
+
+    private bool SelectedTileIsGold => Snapshot.MyHand
+        .FirstOrDefault(tile => tile.Id == SelectedTileId) is { } tile && IsGold(tile);
+    private bool IsGold(TileDto tile) => GameUi.IsGold(tile, Snapshot.GoldTile);
+}

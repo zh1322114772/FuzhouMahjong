@@ -1,0 +1,208 @@
+<button type="button"
+        class="mahjong-tile @(Compact ? "compact" : string.Empty) @(Selected ? "selected" : string.Empty) @(IsGold ? "gold-tile" : string.Empty)"
+        disabled="@Disabled"
+        title="@Tile.Label"
+        aria-label="@Tile.Label"
+        aria-pressed="@Selected"
+        @onclick="HandleClick"
+        @ondblclick="HandleDoubleClick">
+    <svg class="tile-face" viewBox="0 0 60 84" role="img" aria-hidden="true">
+        @switch (Tile.Suit)
+        {
+            case TileSuit.Characters:
+                <foreignObject x="0" y="0" width="60" height="84">
+                    <div class="glyph-face character-face" xmlns="http://www.w3.org/1999/xhtml">
+                        <span class="number-character">@ChineseNumber(Tile.Rank)</span>
+                        <span class="wan-character">萬</span>
+                    </div>
+                </foreignObject>
+                break;
+
+            case TileSuit.Dots:
+                @if (Tile.Rank == 1)
+                {
+                    <g class="one-dot" transform="translate(30 42)">
+                        <circle r="19" class="one-dot-outline" />
+                        <circle r="16" class="one-dot-field" />
+                        @foreach (var angle in Enumerable.Range(0, 12).Select(index => index * 30))
+                        {
+                            <path d="M0 -15 C3.6 -13.5 4.5 -8.5 0 -5.5 C-4.5 -8.5 -3.6 -13.5 0 -15Z"
+                                  transform="rotate(@angle)" />
+                        }
+                        <circle r="7" class="one-dot-center-ring" />
+                        <circle r="4.3" class="one-dot-center" />
+                        <circle r="1.6" class="one-dot-core" />
+                    </g>
+                }
+                else
+                {
+                    @foreach (var mark in DotLayout(Tile.Rank))
+                    {
+                        <g class="dot-pip" transform="translate(@mark.X @mark.Y)" style="--dot-color: @mark.Color">
+                            <circle r="6.7" class="dot-outer" />
+                            <circle r="3.4" class="dot-inner" />
+                            <circle r="1.15" class="dot-core" />
+                        </g>
+                    }
+                }
+                break;
+
+            case TileSuit.Bamboo:
+                @if (Tile.Rank == 1)
+                {
+                    <g class="sparrow" transform="rotate(-3 30 42)">
+                        <path class="bird-tail" d="M27 49 C24 60 19 69 13 77 M31 50 C30 63 27 71 24 79 M35 49 C39 60 40 69 39 76" />
+                        <path class="bird-body" d="M22 38 C24 31 32 28 39 32 C46 36 46 45 40 51 C34 57 24 54 22 47 C21 44 21 41 22 38Z" />
+                        <path class="bird-wing" d="M27 36 C34 33 41 37 41 43 C36 41 33 49 26 48 C30 44 30 40 27 36Z" />
+                        <circle class="bird-head" cx="39" cy="27" r="6.5" />
+                        <path class="bird-crown" d="M36 21 C34 16 37 15 38 20 M40 20 C41 15 44 17 43 22" />
+                        <circle cx="41" cy="25.5" r="1.45" class="bird-eye" />
+                        <path class="bird-beak" d="M45 26 L54 29 L45 31Z" />
+                        <path class="bird-neck" d="M35 31 C36 34 38 36 40 38" />
+                        <path class="bird-feet" d="M28 52 L26 60 M37 53 L39 60 M20 61 C28 58 38 59 46 57" />
+                    </g>
+                }
+                else if (Tile.Rank == 8)
+                {
+                    <g class="eight-bamboo">
+                        <path class="eight-bamboo-outline" d="M11 15 L15 33 L29 21 L43 33 L49 15" />
+                        <path class="eight-bamboo-body" d="M11 15 L15 33 L29 21 L43 33 L49 15" />
+                        <path class="eight-bamboo-core" d="M11 15 L15 33 L29 21 L43 33 L49 15" />
+
+                        <path class="eight-bamboo-outline" d="M11 68 L15 48 L30 61 L44 47 L49 68" />
+                        <path class="eight-bamboo-body" d="M11 68 L15 48 L30 61 L44 47 L49 68" />
+                        <path class="eight-bamboo-core" d="M11 68 L15 48 L30 61 L44 47 L49 68" />
+                    </g>
+                }
+                else
+                {
+                    @foreach (var mark in BambooLayout(Tile.Rank))
+                    {
+                        <g transform="translate(@mark.X @mark.Y)" class="bamboo-stick">
+                            <path class="bamboo-body" style="--bamboo-color: @mark.Color"
+                                  d="M0 -9 C-3.4 -9 -4.1 -6.4 -2.45 -4.05 C-1.2 -2.45 -.9 -1.2 0 0 C.9 -1.2 1.2 -2.45 2.45 -4.05 C4.1 -6.4 3.4 -9 0 -9Z M0 9 C-3.4 9 -4.1 6.4 -2.45 4.05 C-1.2 2.45 -.9 1.2 0 0 C.9 1.2 1.2 2.45 2.45 4.05 C4.1 6.4 3.4 9 0 9Z" />
+                            <path class="bamboo-core"
+                                  d="M0 -7 C-1.35 -7 -1.65 -5.75 -.95 -4.65 C-.4 -3.8 -.25 -2.7 0 -1.75 C.25 -2.7 .4 -3.8 .95 -4.65 C1.65 -5.75 1.35 -7 0 -7Z M0 7 C-1.35 7 -1.65 5.75 -.95 4.65 C-.4 3.8 -.25 2.7 0 1.75 C.25 2.7 .4 3.8 .95 4.65 C1.65 5.75 1.35 7 0 7Z" />
+                        </g>
+                    }
+                }
+                break;
+
+            case TileSuit.Wind:
+                <foreignObject x="0" y="0" width="60" height="84">
+                    <div class="glyph-face" xmlns="http://www.w3.org/1999/xhtml">
+                        <span class="honor-character wind-character">@WindCharacter(Tile.Rank)</span>
+                    </div>
+                </foreignObject>
+                break;
+
+            case TileSuit.Dragon:
+                @if (Tile.Rank == 3)
+                {
+                    <rect x="13" y="18" width="34" height="48" rx="3" class="white-dragon" />
+                }
+                else
+                {
+                    <foreignObject x="0" y="0" width="60" height="84">
+                        <div class="glyph-face" xmlns="http://www.w3.org/1999/xhtml">
+                            <span class="honor-character @(Tile.Rank == 1 ? "red-dragon" : "green-dragon")">@(Tile.Rank == 1 ? "中" : "發")</span>
+                        </div>
+                    </foreignObject>
+                }
+                break;
+
+            case TileSuit.Flower:
+                <g class="flower-art">
+                    <circle cx="30" cy="22" r="5" />
+                    <circle cx="22" cy="27" r="5" />
+                    <circle cx="38" cy="27" r="5" />
+                    <circle cx="25" cy="17" r="5" />
+                    <circle cx="35" cy="17" r="5" />
+                    <circle cx="30" cy="22" r="2.5" class="flower-center" />
+                </g>
+                <foreignObject x="0" y="35" width="60" height="46">
+                    <div class="glyph-face" xmlns="http://www.w3.org/1999/xhtml">
+                        <span class="flower-character">@FlowerCharacter(Tile.Rank)</span>
+                    </div>
+                </foreignObject>
+                break;
+        }
+    </svg>
+</button>
+
+@code {
+    [Parameter, EditorRequired] public TileDto Tile { get; set; } = default!;
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public bool IsGold { get; set; }
+    [Parameter] public EventCallback<TileDto> OnClick { get; set; }
+    [Parameter] public EventCallback<TileDto> OnDoubleClick { get; set; }
+
+    private Task HandleClick() => OnClick.HasDelegate ? OnClick.InvokeAsync(Tile) : Task.CompletedTask;
+    private Task HandleDoubleClick() => OnDoubleClick.HasDelegate ? OnDoubleClick.InvokeAsync(Tile) : Task.CompletedTask;
+
+    private static string ChineseNumber(int rank) => rank switch
+    {
+        1 => "一", 2 => "二", 3 => "三", 4 => "四", 5 => "五",
+        6 => "六", 7 => "七", 8 => "八", _ => "九"
+    };
+
+    private static string WindCharacter(int rank) => rank switch
+    {
+        1 => "東", 2 => "南", 3 => "西", _ => "北"
+    };
+
+    private static string FlowerCharacter(int rank) => rank switch
+    {
+        1 => "梅", 2 => "蘭", 3 => "竹", 4 => "菊",
+        5 => "春", 6 => "夏", 7 => "秋", _ => "冬"
+    };
+
+    private static IReadOnlyList<TileMark> DotLayout(int rank)
+    {
+        var left = 17d;
+        var center = 30d;
+        var right = 43d;
+        var top = 20d;
+        var upper = 32d;
+        var middle = 42d;
+        var lower = 54d;
+        var bottom = 66d;
+        return rank switch
+        {
+            1 => [new(center, middle, "#b62e2e")],
+            2 => [new(right, top, "#182121"), new(left, bottom, "#315c3a")],
+            3 => [new(right, top, "#182121"), new(center, middle, "#c31f2d"), new(left, bottom, "#315c3a")],
+            4 => [new(left, top, "#182121"), new(right, top, "#315c3a"), new(left, bottom, "#315c3a"), new(right, bottom, "#182121")],
+            5 => [new(left, top, "#315c3a"), new(right, top, "#182121"), new(center, middle, "#c31f2d"), new(left, bottom, "#182121"), new(right, bottom, "#315c3a")],
+            6 => [new(left, top, "#315c3a"), new(right, top, "#315c3a"), new(left, middle, "#c31f2d"), new(right, middle, "#c31f2d"), new(left, bottom, "#182121"), new(right, bottom, "#182121")],
+            7 => [new(center, 15, "#c31f2d"), new(left, upper, "#315c3a"), new(right, upper, "#315c3a"), new(left, lower, "#182121"), new(right, lower, "#182121"), new(left, 69, "#315c3a"), new(right, 69, "#315c3a")],
+            8 => [new(left, 15, "#182121"), new(right, 15, "#182121"), new(left, upper, "#315c3a"), new(right, upper, "#315c3a"), new(left, lower, "#c31f2d"), new(right, lower, "#c31f2d"), new(left, 69, "#315c3a"), new(right, 69, "#315c3a")],
+            _ => [new(left, top, "#182121"), new(center, top, "#315c3a"), new(right, top, "#182121"), new(left, middle, "#315c3a"), new(center, middle, "#c31f2d"), new(right, middle, "#315c3a"), new(left, bottom, "#182121"), new(center, bottom, "#315c3a"), new(right, bottom, "#182121")]
+        };
+    }
+
+    private static IReadOnlyList<TileMark> BambooLayout(int rank)
+    {
+        IReadOnlyList<(double X, double Y)> positions = rank switch
+        {
+            2 => [(22d, 29d), (38d, 55d)],
+            3 => [(30d, 18d), (20d, 48d), (40d, 65d)],
+            4 => [(21d, 27d), (39d, 27d), (21d, 59d), (39d, 59d)],
+            5 => [(20d, 22d), (40d, 22d), (30d, 43d), (20d, 64d), (40d, 64d)],
+            6 => [(20d, 20d), (40d, 20d), (20d, 43d), (40d, 43d), (20d, 66d), (40d, 66d)],
+            7 => [(30d, 14d), (18d, 34d), (30d, 34d), (42d, 34d), (18d, 62d), (30d, 62d), (42d, 62d)],
+            8 => [(18d, 18d), (30d, 18d), (42d, 18d), (18d, 43d), (30d, 43d), (42d, 43d), (22d, 67d), (38d, 67d)],
+            _ => [(18d, 18d), (30d, 18d), (42d, 18d), (18d, 43d), (30d, 43d), (42d, 43d), (18d, 68d), (30d, 68d), (42d, 68d)]
+        };
+
+        return positions.Select((position, index) => new TileMark(
+            position.X,
+            position.Y,
+            index % 3 == 1 ? "#bd2430" : "#31543a")).ToArray();
+    }
+
+    private readonly record struct TileMark(double X, double Y, string Color);
+}
+

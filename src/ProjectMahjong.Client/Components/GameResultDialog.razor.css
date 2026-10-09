@@ -1,0 +1,11 @@
+.result-overlay { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: 1rem; background: rgb(5 28 19 / 66%); backdrop-filter: blur(2px); }
+.result-card { width: min(34rem, 100%); max-height: calc(100% - 1rem); margin: 0; padding: 1.5rem; overflow-y: auto; border: 3px solid var(--gold); box-shadow: 0 1rem 3rem rgb(0 0 0 / 45%); }
+.result-card h2 { margin-top: .2rem; font-size: 2rem; }
+.payments { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.payments span { background: var(--surface-soft); padding: .5rem .7rem; border-radius: .5rem; }
+
+@media (max-width: 700px) {
+    .result-overlay { padding: .55rem; }
+    .result-card { padding: 1rem; }
+    .result-card h2 { font-size: 1.5rem; }
+}

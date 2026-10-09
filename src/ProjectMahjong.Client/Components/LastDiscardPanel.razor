@@ -1,0 +1,25 @@
+<div class="table-center @(Snapshot.LastDiscard is not null ? "has-discard" : string.Empty)">
+    @if (Snapshot.LastDiscard is not null)
+    {
+        <span class="last-discard-label">
+            @(Snapshot.LastDiscardFrom is Seat from ? $"{GameUi.SeatName(from)}家打出" : "刚打出")
+        </span>
+        <MahjongTile Tile="Snapshot.LastDiscard"
+                     Disabled="true"
+                     IsGold="@GameUi.IsGold(Snapshot.LastDiscard, Snapshot.GoldTile)" />
+        @if (Snapshot.PendingDiscard is not null)
+        {
+            <span class="claim-timer @(ClaimSecondsRemaining <= 5 ? "urgent" : string.Empty)"
+                  title="响应剩余时间">@ClaimSecondsRemaining</span>
+        }
+    }
+    else
+    {
+        <span class="table-mark">福州<br />麻将</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public RoomSnapshotDto Snapshot { get; set; } = default!;
+    [Parameter] public int ClaimSecondsRemaining { get; set; }
+}
