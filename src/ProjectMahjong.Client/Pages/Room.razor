@@ -5,7 +5,7 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JavaScript
 
-<PageTitle>房间 @RoomCode - 福州麻将</PageTitle>
+<PageTitle>@RoomCode｜福州麻将</PageTitle>
 
 @if (_loading)
 {
@@ -15,30 +15,28 @@ else if (_session is null)
 {
     <div class="center-message card">
         <h1>找不到座位</h1>
-        <p>请通过邀请链接重新加入房间。</p>
-        <a class="button primary" href="/join/@RoomCode">重新加入</a>
+        <p>房间可能已经结束，或服务器已经重启。</p>
+        <a class="button primary" href="/">返回首页</a>
     </div>
 }
 else
 {
     <main class="room-page">
-        <header class="room-header">
-            <div class="room-identity">
-                <span class="small-label">房间号</span>
-                <strong class="room-code">@RoomCode.ToUpperInvariant()</strong>
-            </div>
-            <div class="connection-banner @ConnectionClass" role="status">
-                <span class="status-dot"></span>@ConnectionText
-            </div>
-            <div class="header-actions">
-                <button class="button quiet" @onclick="CopyInviteAsync">复制邀请链接</button>
-                <a class="button quiet" href="/rules" target="_blank">规则</a>
-            </div>
-        </header>
+        <ShareRoomDialog Open="_shareOpen"
+                         RoomCode="@RoomCode"
+                         OnClose="() => _shareOpen = false" />
+
+        @if (Connection.Status != GameConnectionStatus.Connected)
+        {
+            <div class="connection-banner" role="status"><span class="status-dot"></span>@ConnectionText</div>
+        }
 
         @if (!string.IsNullOrWhiteSpace(Connection.Error))
         {
-            <div class="alert" role="alert">@Connection.Error</div>
+            <div class="alert room-error" role="alert">
+                <span>@Connection.Error</span>
+                <a class="button quiet" href="/">返回首页</a>
+            </div>
         }
 
         @if (Snapshot is null)
@@ -51,19 +49,22 @@ else
                        Me="Me"
                        CanStartGame="CanStartGame"
                        CommandPending="_commandPending"
+                       OnShare="() => _shareOpen = true"
                        OnToggleReady="ToggleReadyAsync"
                        OnStartGame="StartGameAsync" />
         }
         else
         {
-            <GameStatusBar Snapshot="Snapshot" />
-
             <section class="table-grid">
+                <button class="table-share-button" @onclick="() => _shareOpen = true" aria-label="分享房间">分享</button>
+                <GameStatusBar Snapshot="Snapshot" ActionSecondsRemaining="ActionSecondsRemaining" />
+
                 @foreach (var player in Snapshot.Players.OrderBy(player => player.Seat))
                 {
                     <PlayerPanel Player="player"
                                  CurrentPlayerId="Snapshot.CurrentPlayerId"
                                  IsCurrentTurn="@(player.Seat == Snapshot.CurrentTurn)"
+                                 IsDealer="@(player.Seat == Snapshot.Dealer)"
                                  Position="@SeatPosition(player.Seat)"
                                  MyHand="Snapshot.MyHand"
                                  DrawnTileId="Snapshot.MyDrawnTileId"
@@ -75,9 +76,9 @@ else
                                  OnTileDoubleClick="DiscardTileAsync" />
                 }
 
-                <LastDiscardPanel Snapshot="Snapshot" ClaimSecondsRemaining="ClaimSecondsRemaining" />
+                <LastDiscardPanel Snapshot="Snapshot" />
 
-                @if (HasAvailableActions)
+                @if (ShowActionBar)
                 {
                     <GameActionBar Snapshot="Snapshot"
                                    SelectedTileId="_selectedTileId"
@@ -112,6 +113,7 @@ else
     private int? _selectedTileId;
     private bool _loading = true;
     private bool _commandPending;
+    private bool _shareOpen;
     private readonly CancellationTokenSource _clockCancellation = new();
 
     private RoomSnapshotDto? Snapshot => Connection.Snapshot;
@@ -126,10 +128,18 @@ else
          Snapshot.AvailableActions.ChiOptions.Count > 0 ||
          Snapshot.AvailableActions.ConcealedKongOptions.Count > 0 ||
          Snapshot.AvailableActions.AddedKongOptions.Count > 0);
-    private int ClaimSecondsRemaining => Snapshot?.ClaimDeadlineUtc is not { } deadline
+    private bool ShowActionBar => HasAvailableActions &&
+        (Snapshot!.AvailableActions.CanPass ||
+         Snapshot.AvailableActions.CanHu ||
+         Snapshot.AvailableActions.CanPeng ||
+         Snapshot.AvailableActions.CanExposedKong ||
+         Snapshot.AvailableActions.ChiOptions.Count > 0 ||
+         Snapshot.AvailableActions.ConcealedKongOptions.Count > 0 ||
+         Snapshot.AvailableActions.AddedKongOptions.Count > 0 ||
+         (Snapshot.AvailableActions.CanDiscard && _selectedTileId is not null));
+    private int ActionSecondsRemaining => Snapshot?.ActionDeadlineUtc is not { } deadline
         ? 0
         : Math.Max(0, (int)Math.Ceiling((deadline - DateTimeOffset.UtcNow).TotalSeconds));
-    private string ConnectionClass => Connection.Status == GameConnectionStatus.Connected ? "connected" : "disconnected";
     private string ConnectionText => Connection.Status switch
     {
         GameConnectionStatus.Connected => "网络已连接",
@@ -202,12 +212,6 @@ else
         _commandPending = true;
         await command();
         _commandPending = false;
-    }
-
-    private async Task CopyInviteAsync()
-    {
-        var url = Navigation.ToAbsoluteUri($"/join/{RoomCode}").ToString();
-        await JavaScript.InvokeVoidAsync("navigator.clipboard.writeText", url);
     }
 
     private string SeatPosition(Seat seat) => (((int)seat - (int)Me.Seat + 4) % 4) switch

@@ -1,13 +1,11 @@
-.room-page { max-width: 120rem; margin: 0 auto; padding: 1rem; }
-.room-header { display: grid; grid-template-columns: minmax(9rem, auto) minmax(12rem, 1fr) auto; align-items: center; gap: 1rem; margin-bottom: .75rem; }
-.room-code { display: block; font-size: 1.7rem; letter-spacing: .15em; }
-.small-label { color: var(--muted); font-size: .85rem; }
-.header-actions { display: flex; gap: .5rem; }
-.connection-banner { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2rem; padding: .35rem .6rem; border-radius: .55rem; background: #fff1d6; color: #744c00; }
-.connection-banner.connected { background: #daf3df; color: #205c2e; }
+.room-page { max-width: 120rem; margin: 0 auto; padding: .45rem; }
+.connection-banner { position: fixed; top: .4rem; left: 50%; z-index: 20; display: flex; align-items: center; gap: .5rem; min-height: 2rem; padding: .35rem .6rem; transform: translateX(-50%); border-radius: .55rem; background: #fff1d6; color: #744c00; box-shadow: 0 .2rem .6rem rgb(0 0 0 / 20%); }
 .status-dot { width: .65rem; height: .65rem; border-radius: 50%; background: currentColor; }
+.room-error { display: flex; align-items: center; justify-content: space-between; gap: .7rem; }
+.room-error .button { min-height: 2.2rem; flex: 0 0 auto; padding: .3rem .65rem; }
 
-.table-grid { position: relative; height: clamp(32rem, calc(100dvh - 12rem), 48rem); display: grid; grid-template-columns: minmax(10rem, .75fr) minmax(24rem, 2.5fr) minmax(10rem, .75fr); grid-template-rows: 9rem minmax(6rem, 1fr) 15rem auto; gap: .55rem; padding: .7rem; overflow: hidden; border: .55rem solid #154c34; border-radius: 1.3rem; background: radial-gradient(circle at center, #31805b 0 13%, #286e4e 58%, #205d42 100%); box-shadow: inset 0 0 2.5rem rgb(0 0 0 / 24%), var(--shadow-lg); }
+.table-grid { position: relative; height: calc(100dvh - .9rem); min-height: 32rem; max-height: 55rem; display: grid; grid-template-columns: minmax(9rem, .72fr) minmax(24rem, 2.6fr) minmax(9rem, .72fr); grid-template-rows: 9rem minmax(7rem, 1fr) 14.5rem; gap: .45rem; padding: .65rem; overflow: hidden; border: .55rem solid #154c34; border-radius: 1.3rem; background: radial-gradient(circle at center, #31805b 0 13%, #286e4e 58%, #205d42 100%); box-shadow: inset 0 0 2.5rem rgb(0 0 0 / 24%), var(--shadow-lg); }
+.table-share-button { position: absolute; top: .55rem; left: .6rem; z-index: 8; min-height: 2rem; padding: .25rem .6rem; border: 1px solid rgb(255 255 255 / 36%); border-radius: 99rem; color: #f4fbf6; background: rgb(12 57 39 / 78%); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
 
 .center-message { min-height: 60dvh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 2rem; }
 .center-message.card { max-width: 30rem; min-height: auto; margin: 5rem auto; }
@@ -15,37 +13,26 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1100px) {
-    .room-page { padding: .45rem; }
-    .room-header { grid-template-columns: auto minmax(4.7rem, 1fr) auto; align-items: center; gap: .3rem; margin-bottom: .35rem; }
-    .room-identity { min-width: 0; }
-    .small-label { display: none; }
-    .room-code { font-size: 1.05rem; letter-spacing: .1em; }
-    .connection-banner { min-height: 2rem; padding: .25rem .35rem; font-size: .68rem; white-space: nowrap; }
+    .room-page { padding: .25rem; }
+    .connection-banner { min-height: 2rem; padding: .25rem .35rem; font-size: .7rem; white-space: nowrap; }
     .status-dot { width: .5rem; height: .5rem; }
-    .header-actions { flex-direction: row; gap: .25rem; }
-    .header-actions .button { min-height: 2rem; padding: .25rem .4rem; font-size: .68rem; }
-    .table-grid { height: calc(100dvh - 7.25rem); min-height: 36rem; max-height: 60rem; grid-template-columns: 4.6rem minmax(0, 1fr) 4.6rem; grid-template-rows: 7.25rem minmax(12rem, 1fr) 10rem; gap: .3rem; padding: .3rem; border-width: .3rem; border-radius: .8rem; }
+    .table-grid { height: calc(100dvh - .5rem); min-height: 34rem; max-height: none; grid-template-columns: 5.1rem minmax(0, 1fr) 5.1rem; grid-template-rows: 7rem minmax(11rem, 1fr) 10.5rem; gap: .25rem; padding: .3rem; border-width: .3rem; border-radius: .8rem; }
+    .table-share-button { top: .35rem; left: .35rem; min-height: 1.7rem; padding: .15rem .45rem; font-size: .65rem; }
 }
 
 @media (max-width: 1100px) and (max-height: 500px) and (orientation: landscape) {
-    .room-page { padding: .25rem; }
-    .room-header { margin-bottom: .2rem; }
-    .room-code { font-size: .95rem; }
+    .room-page { padding: .12rem; }
     .connection-banner { min-height: 1.8rem; }
-    .header-actions .button { min-height: 1.8rem; }
-    .table-grid { height: calc(100dvh - 5.25rem); min-height: 16rem; max-height: none; grid-template-columns: 6rem minmax(0, 1fr) 6rem; grid-template-rows: 3.5rem minmax(4.25rem, 1fr) 6.75rem; gap: .25rem; padding: .25rem; border-width: .25rem; }
+    .table-grid { height: calc(100dvh - .24rem); min-height: 16rem; max-height: none; grid-template-columns: 6.2rem minmax(0, 1fr) 6.2rem; grid-template-rows: 5.3rem minmax(4.5rem, 1fr) 9.5rem; gap: .18rem; padding: .2rem; border-width: .22rem; }
+    .table-share-button { top: .2rem; left: .25rem; }
 }
 
 @media (min-width: 1101px) and (max-width: 1700px) and (max-height: 900px) {
-    .table-grid { grid-template-rows: 8.25rem minmax(6rem, 1fr) 11.5rem auto; }
+    .table-grid { grid-template-rows: 8.25rem minmax(6rem, 1fr) 11.5rem; }
 }
 
 @media (min-width: 1101px) and (max-height: 760px) {
-    .room-page { padding-top: .55rem; padding-bottom: .55rem; }
-    .room-header { margin-bottom: .35rem; }
-    .room-identity { display: flex; align-items: baseline; gap: .5rem; }
-    .room-code { font-size: 1.45rem; }
-    .header-actions .button { min-height: 2.4rem; padding: .35rem .75rem; }
+    .room-page { padding-top: .3rem; padding-bottom: .3rem; }
     .connection-banner { padding: .25rem; font-size: .82rem; }
-    .table-grid { height: calc(100dvh - 8.25rem); min-height: 31rem; grid-template-rows: 8rem minmax(6rem, 1fr) 11rem auto; }
+    .table-grid { height: calc(100dvh - .6rem); min-height: 31rem; grid-template-rows: 8rem minmax(6rem, 1fr) 11rem; }
 }

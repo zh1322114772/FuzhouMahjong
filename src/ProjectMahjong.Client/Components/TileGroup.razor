@@ -1,0 +1,38 @@
+@foreach (var group in Groups)
+{
+    <span class="tile-group @(group.Count > 1 ? "repeated" : string.Empty) @(IsHonor(group.Tile) ? "honor-tile" : string.Empty)"
+          title="@(group.Count > 1 ? $"{group.Tile.Label} ×{group.Count}" : group.Tile.Label)">
+        <MahjongTile Tile="group.Tile" Compact="true" Disabled="true" IsGold="@IsGold(group.Tile)" />
+        @if (group.Count > 1)
+        {
+            <strong class="tile-count">×@group.Count</strong>
+        }
+    </span>
+}
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<TileDto> Tiles { get; set; } = [];
+    [Parameter] public TileDto? GoldTile { get; set; }
+
+    private IEnumerable<TileCount> Groups => Tiles
+        .GroupBy(tile => tile.Code)
+        .Select(group => new TileCount(group.First(), group.Count()))
+        .OrderBy(group => TileOrder(group.Tile.Suit))
+        .ThenBy(group => group.Tile.Rank);
+
+    private bool IsGold(TileDto tile) => GameUi.IsGold(tile, GoldTile);
+    private static bool IsHonor(TileDto tile) => tile.Suit is TileSuit.Wind or TileSuit.Dragon;
+
+    // Keep all honor tiles together, followed by the three numbered suits.
+    private static int TileOrder(TileSuit suit) => suit switch
+    {
+        TileSuit.Wind => 0,
+        TileSuit.Dragon => 1,
+        TileSuit.Characters => 2,
+        TileSuit.Dots => 3,
+        TileSuit.Bamboo => 4,
+        _ => 5
+    };
+
+    private sealed record TileCount(TileDto Tile, int Count);
+}

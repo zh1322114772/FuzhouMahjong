@@ -1,5 +1,5 @@
 <section class="lobby card">
-    <h1>等待开桌</h1>
+    <header><h1>等待开桌</h1><button class="button quiet" @onclick="OnShare">分享房间</button></header>
     <p>真人准备后即可开始，空位会由电脑补上。</p>
 
     <div class="seat-list">
@@ -48,6 +48,7 @@
     [Parameter, EditorRequired] public SeatSnapshotDto Me { get; set; } = default!;
     [Parameter] public bool CanStartGame { get; set; }
     [Parameter] public bool CommandPending { get; set; }
+    [Parameter] public EventCallback OnShare { get; set; }
     [Parameter] public EventCallback OnToggleReady { get; set; }
     [Parameter] public EventCallback OnStartGame { get; set; }
 }

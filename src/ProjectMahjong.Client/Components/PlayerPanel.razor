@@ -1,21 +1,28 @@
-<article class="player-panel position-@Position @(IsCurrentTurn ? "current-turn" : string.Empty)">
-    <header>
-        <div>
-            <span class="seat-wind">@GameUi.SeatName(Player.Seat)</span>
-            <strong class="player-name">@Player.DisplayName</strong>
-            @if (Player.IsBot) { <span class="badge bot-badge" title="电脑玩家">电脑</span> }
-        </div>
-        <strong class="score">@Player.Score 分</strong>
+@using System.Globalization
+
+<article class="player-panel position-@Position">
+    <header class="player-identity">
+        <span class="avatar @(IsCurrentTurn ? "current-turn" : string.Empty) @(IsDisconnected ? "disconnected" : string.Empty)"
+              title="@(IsDisconnected ? "玩家掉线，AI 暂时接管" : Player.DisplayName)">@NameInitial</span>
+        <span class="identity-text">
+            <strong class="player-name @(IsDealer ? "dealer" : string.Empty) @(IsDisconnected ? "disconnected" : string.Empty)">@Player.DisplayName</strong>
+            <small>@GameUi.SeatName(Player.Seat) · @Player.Score 分</small>
+            @if (IsDisconnected)
+            {
+                <em>AI 接管</em>
+            }
+            else if (Player.IsBot)
+            {
+                <em>电脑</em>
+            }
+        </span>
     </header>
 
     @if (IsLocalPlayer)
     {
         <div class="own-hand-area">
             <div class="own-hand-heading">
-                <span>我的手牌</span>
-                <span class="hand-swipe-hint" aria-hidden="true">↔</span>
-                <span class="double-click-hint">双击直接打出</span>
-                <span class="mobile-discard-hint">点牌后在桌面中央确认</span>
+                <span>双击出牌</span>
                 @if (MyGoldCount > 0)
                 {
                     <strong class="gold-count">金 × @MyGoldCount</strong>
@@ -24,22 +31,14 @@
             <div class="hand" aria-label="我的手牌">
                 @foreach (var tile in MyHand.Where(tile => tile.Id != DrawnTileId))
                 {
-                    <MahjongTile Tile="tile"
-                                 IsGold="@IsGold(tile)"
-                                 Selected="@(SelectedTileId == tile.Id)"
-                                 Disabled="@HandDisabled"
-                                 OnClick="OnTileSelected"
-                                 OnDoubleClick="OnTileDoubleClick" />
+                    <MahjongTile Tile="tile" IsGold="@IsGold(tile)" Selected="@(SelectedTileId == tile.Id)"
+                                 Disabled="@HandDisabled" OnClick="OnTileSelected" OnDoubleClick="OnTileDoubleClick" />
                 }
                 @if (DrawnTile is { } drawnTile)
                 {
                     <div class="drawn-tile" aria-label="刚摸进的牌">
-                        <MahjongTile Tile="drawnTile"
-                                     IsGold="@IsGold(drawnTile)"
-                                     Selected="@(SelectedTileId == drawnTile.Id)"
-                                     Disabled="@HandDisabled"
-                                     OnClick="OnTileSelected"
-                                     OnDoubleClick="OnTileDoubleClick" />
+                        <MahjongTile Tile="drawnTile" IsGold="@IsGold(drawnTile)" Selected="@(SelectedTileId == drawnTile.Id)"
+                                     Disabled="@HandDisabled" OnClick="OnTileSelected" OnDoubleClick="OnTileDoubleClick" />
                     </div>
                 }
             </div>
@@ -47,54 +46,24 @@
     }
     else
     {
-        <p class="player-meta">
-            @if (Player.IsConnected)
-            {
-                <span class="tile-back" aria-hidden="true"></span><strong>× @Player.ConcealedTileCount</strong>
-            }
-            else
-            {
-                <span>正在重连…</span>
-            }
-        </p>
+        <div class="concealed-count" aria-label="@Player.ConcealedTileCount 张手牌">
+            <span class="tile-back" aria-hidden="true"></span><strong>×@Player.ConcealedTileCount</strong>
+        </div>
     }
 
     <div class="public-tiles">
         @if (Player.Flowers.Count > 0)
         {
-            <div class="public-row" aria-label="花牌">
-                <span>花</span>
-                <div class="tile-strip">
-                    @foreach (var tile in Player.Flowers)
-                    {
-                        <MahjongTile Tile="tile" Compact="true" Disabled="true" IsGold="@IsGold(tile)" />
-                    }
-                </div>
-            </div>
+            <div class="public-group" aria-label="花牌"><span class="group-label">花</span><TileGroup Tiles="Player.Flowers" GoldTile="GoldTile" /></div>
         }
-        @if (Player.Melds.Count > 0)
+        @foreach (var meld in Player.Melds)
         {
-            <div class="public-row" aria-label="吃碰杠">
-                <span>组</span>
-                <div class="meld-strip">
-                    @foreach (var meld in Player.Melds)
-                    {
-                        <div class="tile-strip meld" title="@GameUi.MeldName(meld.Kind)">
-                            @foreach (var tile in meld.Tiles)
-                            {
-                                <MahjongTile Tile="tile" Compact="true" Disabled="true" IsGold="@IsGold(tile)" />
-                            }
-                        </div>
-                    }
-                </div>
-            </div>
+            <div class="public-group" aria-label="@GameUi.MeldName(meld.Kind)"><span class="group-label">@GameUi.MeldName(meld.Kind)</span><TileGroup Tiles="meld.Tiles" GoldTile="GoldTile" /></div>
         }
-        <div class="discard-river" aria-label="@Player.DisplayName 的弃牌">
-            @foreach (var tile in Player.Discards)
-            {
-                <MahjongTile Tile="tile" Compact="true" Disabled="true" IsGold="@IsGold(tile)" />
-            }
-        </div>
+        @if (Player.Discards.Count > 0)
+        {
+            <div class="public-group discard-river" aria-label="@Player.DisplayName 的弃牌"><TileGroup Tiles="Player.Discards" GoldTile="GoldTile" /></div>
+        }
     </div>
 </article>
 
@@ -102,6 +71,7 @@
     [Parameter, EditorRequired] public SeatSnapshotDto Player { get; set; } = default!;
     [Parameter] public Guid CurrentPlayerId { get; set; }
     [Parameter] public bool IsCurrentTurn { get; set; }
+    [Parameter] public bool IsDealer { get; set; }
     [Parameter, EditorRequired] public string Position { get; set; } = string.Empty;
     [Parameter, EditorRequired] public IReadOnlyList<TileDto> MyHand { get; set; } = [];
     [Parameter] public int? DrawnTileId { get; set; }
@@ -113,10 +83,10 @@
     [Parameter] public EventCallback<TileDto> OnTileDoubleClick { get; set; }
 
     private bool IsLocalPlayer => Player.PlayerId == CurrentPlayerId;
+    private bool IsDisconnected => !Player.IsBot && !Player.IsConnected;
     private bool HandDisabled => !CanDiscard || CommandPending;
     private int MyGoldCount => MyHand.Count(IsGold);
-    private TileDto? DrawnTile => DrawnTileId is int id
-        ? MyHand.FirstOrDefault(tile => tile.Id == id)
-        : null;
+    private string NameInitial => StringInfo.GetNextTextElement(Player.DisplayName.Trim());
+    private TileDto? DrawnTile => DrawnTileId is int id ? MyHand.FirstOrDefault(tile => tile.Id == id) : null;
     private bool IsGold(TileDto tile) => GameUi.IsGold(tile, GoldTile);
 }

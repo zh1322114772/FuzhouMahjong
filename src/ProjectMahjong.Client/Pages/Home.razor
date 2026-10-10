@@ -18,7 +18,7 @@
         }
 
         <label for="display-name">你的名字</label>
-        <input id="display-name" maxlength="12" autocomplete="nickname"
+        <input id="display-name" maxlength="8" autocomplete="nickname"
                placeholder="例如：陈阿姨" @bind="_displayName" />
 
         @if (string.IsNullOrWhiteSpace(InviteCode))
@@ -29,7 +29,7 @@
             <div class="divider"><span>或者加入房间</span></div>
             <label for="room-code">六位房间号</label>
             <input id="room-code" class="room-code-input" maxlength="6" autocomplete="off"
-                   placeholder="例如：M8K2WX" @bind="_roomCode" />
+                   inputmode="numeric" pattern="[0-9]*" placeholder="例如：381026" @bind="_roomCode" />
             <button class="button secondary large" disabled="@_busy" @onclick="JoinRoomAsync">加入房间</button>
         }
         else

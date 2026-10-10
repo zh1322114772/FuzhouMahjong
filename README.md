@@ -40,7 +40,9 @@ dotnet build ProjectMahjong.slnx --no-restore
 dotnet test ProjectMahjong.slnx --no-restore
 ```
 
-The Playwright test starts the Release server, opens four isolated browser players, plays into the late game, and checks shared discards plus complete, unclipped layouts at Windows 125%/150% scaling on 1080p and ultrawide screens:
+The Playwright suite starts the Release server, checks a shared four-player
+desktop table, and runs a five-hand mobile simulation with iPhone/iPad
+landscape emulation and unclipped-tile assertions:
 
 ```powershell
 npm install
@@ -76,7 +78,7 @@ Edit `src/ProjectMahjong.Server/appsettings.json`:
   "StartingScore": 100,
   "TotalHands": 4,
   "BaseHandPoints": 3,
-  "ClaimTimeoutSeconds": 20,
+  "ActionTimeoutSeconds": 60,
   "EmptyRoomLifetimeMinutes": 30
 }
 ```

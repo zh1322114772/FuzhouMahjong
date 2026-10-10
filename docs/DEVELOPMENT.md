@@ -111,13 +111,13 @@ The defaults live under `FuzhouRules` in
 | `StartingScore` | 100 | Score assigned at match start/rematch |
 | `TotalHands` | 4 | Hands before `MatchEnded` |
 | `BaseHandPoints` | 3 | Base value used by scoring |
-| `ClaimTimeoutSeconds` | 20 | Time to answer a discard |
+| `ActionTimeoutSeconds` | 60 | Time for every discard or claim decision |
 | `EmptyRoomLifetimeMinutes` | 30 | Disconnected room retention |
 
 Production values can be overridden without editing the file, for example:
 
 ```text
-FuzhouRules__ClaimTimeoutSeconds=30
+FuzhouRules__ActionTimeoutSeconds=60
 FuzhouRules__EmptyRoomLifetimeMinutes=60
 ```
 

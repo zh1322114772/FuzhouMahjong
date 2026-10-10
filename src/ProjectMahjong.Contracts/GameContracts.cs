@@ -94,7 +94,7 @@ public sealed record RoomSnapshotDto(
     Seat? PendingDiscardFrom,
     TileDto? LastDiscard,
     Seat? LastDiscardFrom,
-    DateTimeOffset? ClaimDeadlineUtc,
+    DateTimeOffset? ActionDeadlineUtc,
     IReadOnlyList<SeatSnapshotDto> Players,
     IReadOnlyList<TileDto> MyHand,
     int? MyDrawnTileId,

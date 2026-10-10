@@ -155,8 +155,9 @@ ownership location.
 ## Claims and timers
 
 After a discard, the engine computes eligible claim possibilities. The room
-publishes a UTC deadline using configured `ClaimTimeoutSeconds` (20 by default).
-The browser only displays the countdown.
+publishes a UTC deadline using configured `ActionTimeoutSeconds` (60 by default)
+for both turn discards and claim decisions. The browser only displays the
+countdown; the server owns timeout resolution.
 
 Several players can answer the same snapshot. Claim commands therefore allow a
 stale expected revision, while eligibility and duplicate answers are still
@@ -188,9 +189,11 @@ The room creator is host and East. Joining players receive the next free seat.
 Each human has a random player ID and 128-bit reconnect token. The browser saves
 these in `localStorage`.
 
-A disconnect marks the participant offline but does not remove the seat. A
-valid resume replaces the old connection ID and receives a new private
-snapshot. Rooms are checked once per minute and removed when both conditions
+A disconnect marks the participant offline but does not remove the seat. After
+a human has connected once, the server temporarily runs that seat through the
+bot policy while it remains disconnected. A valid resume replaces the old
+connection ID and receives a new private snapshot. Rooms are checked once per
+minute and removed when both conditions
 hold:
 
 - no human is connected;

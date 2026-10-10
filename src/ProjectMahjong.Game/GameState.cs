@@ -97,8 +97,6 @@ public sealed class GameState(
 
     public Seat CurrentTurn { get; set; } = dealer;
 
-    public int DealerContinuation { get; set; }
-
     public int HandNumber { get; set; }
 
     public HandPhase Phase { get; set; } = HandPhase.NotStarted;

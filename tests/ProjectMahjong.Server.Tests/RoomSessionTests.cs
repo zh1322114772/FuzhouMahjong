@@ -154,4 +154,48 @@ public sealed class RoomSessionTests
             Assert.True(after.AvailableActions.CanPass);
         }
     }
+
+    [Fact]
+    public async Task EveryActionReceivesADeadline()
+    {
+        using var room = new RoomSession("123456", "房主", new FuzhouRuleOptions
+        {
+            ActionTimeoutSeconds = 60
+        });
+        var host = await room.GetHostSessionAsync();
+        await room.SetReadyAsync(host.PlayerId, true);
+
+        Assert.True((await room.StartGameAsync(host.PlayerId)).Accepted);
+        var snapshot = (await room.GetSnapshotAsync(host.PlayerId))!;
+
+        Assert.NotNull(snapshot.ActionDeadlineUtc);
+        Assert.InRange(
+            snapshot.ActionDeadlineUtc.Value - DateTimeOffset.UtcNow,
+            TimeSpan.FromSeconds(55),
+            TimeSpan.FromSeconds(61));
+    }
+
+    [Fact]
+    public async Task DisconnectedHumanIsTemporarilyAutomated()
+    {
+        using var room = new RoomSession("123456", "东家", new FuzhouRuleOptions());
+        var east = await room.GetHostSessionAsync();
+        var south = (await room.JoinAsync("南家")).Session!;
+        await room.ConnectAsync(east.PlayerId, east.ReconnectToken, "east-connection");
+        await room.ConnectAsync(south.PlayerId, south.ReconnectToken, "south-connection");
+        await room.SetReadyAsync(east.PlayerId, true);
+        await room.SetReadyAsync(south.PlayerId, true);
+        await room.StartGameAsync(east.PlayerId);
+        var before = (await room.GetSnapshotAsync(south.PlayerId))!;
+
+        Assert.True(await room.DisconnectAsync(east.PlayerId, "east-connection"));
+        await room.RunBotsAsync();
+        var after = (await room.GetSnapshotAsync(south.PlayerId))!;
+
+        Assert.False(after.Players.Single(player => player.PlayerId == east.PlayerId).IsConnected);
+        Assert.True(after.Revision > before.Revision);
+        Assert.True(
+            after.CurrentTurn != Seat.East || after.PendingDiscardFrom == Seat.East,
+            "Disconnected East should either finish the turn or be waiting for claims on its automatic discard.");
+    }
 }

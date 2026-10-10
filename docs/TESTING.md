@@ -59,15 +59,9 @@ Playwright starts the server at `http://127.0.0.1:5271` with `--no-build`. If
 that port is already occupied, stop the old `ProjectMahjong.Server` process or
 reuse it only when it was built from the current source.
 
-The test creates four independent browser contexts and uses these effective
-Windows scaling profiles:
-
-| Label | Viewport | Device scale |
-|---|---:|---:|
-| `1080p-125` | 1536×864 | 1.25 |
-| `1080p-150` | 1280×720 | 1.5 |
-| `ultrawide-125` | 2752×1152 | 1.25 |
-| `ultrawide-150` | 2293×960 | 1.5 |
+The desktop test creates four independent browser contexts with 1080p and
+ultrawide viewports. Mobile coverage emulates iPhone 13 and iPad (7th
+generation) in landscape orientation.
 
 It verifies:
 
@@ -76,9 +70,15 @@ It verifies:
 - a drawn tile is separated at the far right and merges after discard;
 - double-click discard and select-then-discard both work;
 - every player sees the same latest discard;
-- claim countdown is checked whenever the shuffle produces a claim;
+- the shared 60-second action countdown is visible;
 - the game reaches a centered result dialog;
 - no player panel clips tiles and no browser exception occurs.
+
+The iPhone flow plays five complete hands (continuing through a rematch after
+the configured four-hand match), checks initial, late-hand, and result layouts,
+and verifies that concealed/public tiles stay inside the visible table. The
+iPad flow verifies the select-then-discard control remains below the table
+center and above the hand.
 
 Screenshots and traces are written under `test-results/`. Keep that directory as
 a local artifact, not source documentation.

@@ -11,8 +11,9 @@ public sealed class RoomSession : IDisposable
     private readonly Dictionary<Guid, RoomParticipant> _participants = [];
     private readonly HashSet<Guid> _processedCommands = [];
     private FuzhouGame? _game;
-    private int? _claimDeadlineTileId;
-    private DateTimeOffset? _claimDeadlineUtc;
+    private long _actionDeadlineId;
+    private string? _actionDeadlineKey;
+    private DateTimeOffset? _actionDeadlineUtc;
 
     public RoomSession(string code, string hostName, FuzhouRuleOptions options)
     {
@@ -112,6 +113,7 @@ public sealed class RoomSession : IDisposable
             }
 
             participant!.ConnectionId = connectionId;
+            participant.HasConnected = true;
             Touch();
             Revision++;
             return null;
@@ -256,18 +258,46 @@ public sealed class RoomSession : IDisposable
             (game, seat) => game.SubmitClaim(seat, choice),
             allowStaleRevision: true);
 
-    public async Task<bool> ResolveClaimTimeoutAsync(int claimTileId)
+    public async Task<ActionDeadline?> GetActionDeadlineAsync()
     {
         await _gate.WaitAsync();
         try
         {
-            if (_game?.State.PendingClaims?.Discard.Id != claimTileId)
+            return _actionDeadlineUtc is { } dueAt
+                ? new ActionDeadline(_actionDeadlineId, dueAt)
+                : null;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<bool> ResolveActionTimeoutAsync(long deadlineId)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            if (_game is null || _actionDeadlineUtc is null ||
+                _actionDeadlineId != deadlineId || DateTimeOffset.UtcNow < _actionDeadlineUtc)
             {
                 return false;
             }
 
-            _game.ResolveClaimTimeout();
-            SyncClaimDeadline();
+            if (_game.State.Phase == HandPhase.AwaitingClaims)
+            {
+                _game.ResolveClaimTimeout();
+            }
+            else if (_game.State.Phase == HandPhase.AwaitingDiscard)
+            {
+                PlayBotTurn(_game.State.CurrentTurn);
+            }
+            else
+            {
+                return false;
+            }
+
+            SyncActionDeadline(force: true);
             Touch();
             Revision++;
             return true;
@@ -278,14 +308,14 @@ public sealed class RoomSession : IDisposable
         }
     }
 
-    public async Task<int?> RunBotsAsync()
+    public async Task RunBotsAsync()
     {
         await _gate.WaitAsync();
         try
         {
             if (_game is null)
             {
-                return null;
+                return;
             }
 
             var changed = false;
@@ -299,7 +329,7 @@ public sealed class RoomSession : IDisposable
                 if (_game.State.Phase == HandPhase.AwaitingClaims)
                 {
                     var waitingBots = _game.State.PendingClaims!.Possibilities.Keys
-                        .Where(seat => _participants.Values.Single(player => player.Seat == seat).IsBot)
+                        .Where(seat => _participants.Values.Single(player => player.Seat == seat).IsAutomated)
                         .Where(seat => !_game.State.PendingClaims.Choices.ContainsKey(seat))
                         .ToArray();
 
@@ -322,7 +352,7 @@ public sealed class RoomSession : IDisposable
                 }
 
                 var currentPlayer = _participants.Values.Single(player => player.Seat == _game.State.CurrentTurn);
-                if (!currentPlayer.IsBot)
+                if (!currentPlayer.IsAutomated)
                 {
                     break;
                 }
@@ -337,8 +367,7 @@ public sealed class RoomSession : IDisposable
                 Revision++;
             }
 
-            SyncClaimDeadline();
-            return _game.State.PendingClaims?.Discard.Id;
+            SyncActionDeadline(force: changed);
         }
         finally
         {
@@ -426,11 +455,10 @@ public sealed class RoomSession : IDisposable
 
             _processedCommands.Add(commandId);
             TrimProcessedCommands();
-            SyncClaimDeadline();
+            SyncActionDeadline(force: _game.State.Phase == HandPhase.AwaitingDiscard);
             Touch();
             Revision++;
-            var claimTileId = result.StartClaimTimer ? _game.State.PendingClaims?.Discard.Id : null;
-            return RoomMutation.Success(Revision, claimTileId);
+            return RoomMutation.Success(Revision);
         }
         finally
         {
@@ -449,7 +477,7 @@ public sealed class RoomSession : IDisposable
                 return RoomMutation.Reject(result.Error ?? "操作失败。", Revision);
             }
 
-            SyncClaimDeadline();
+            SyncActionDeadline(force: true);
             Touch();
             Revision++;
             return RoomMutation.Success(Revision);
@@ -512,7 +540,7 @@ public sealed class RoomSession : IDisposable
             pending?.DiscardedBy,
             _game.State.LastDiscard?.ToDto(),
             _game.State.LastDiscardedBy,
-            _claimDeadlineUtc,
+            _actionDeadlineUtc,
             seats,
             viewerState.Hand.Select(tile => tile.ToDto()).ToArray(),
             viewerState.DrawnTileId,
@@ -728,20 +756,27 @@ public sealed class RoomSession : IDisposable
         _ => "北"
     };
 
-    private void SyncClaimDeadline()
+    private void SyncActionDeadline(bool force = false)
     {
-        var pendingTileId = _game?.State.PendingClaims?.Discard.Id;
-        if (pendingTileId is null)
+        var key = _game?.State.Phase switch
         {
-            _claimDeadlineTileId = null;
-            _claimDeadlineUtc = null;
+            HandPhase.AwaitingDiscard => $"discard:{_game.State.HandNumber}:{_game.State.CurrentTurn}",
+            HandPhase.AwaitingClaims => $"claim:{_game.State.PendingClaims?.Discard.Id}",
+            _ => null
+        };
+
+        if (key is null)
+        {
+            _actionDeadlineKey = null;
+            _actionDeadlineUtc = null;
             return;
         }
 
-        if (_claimDeadlineTileId != pendingTileId)
+        if (force || !string.Equals(_actionDeadlineKey, key, StringComparison.Ordinal))
         {
-            _claimDeadlineTileId = pendingTileId;
-            _claimDeadlineUtc = DateTimeOffset.UtcNow.AddSeconds(_options.ClaimTimeoutSeconds);
+            _actionDeadlineKey = key;
+            _actionDeadlineId++;
+            _actionDeadlineUtc = DateTimeOffset.UtcNow.AddSeconds(_options.ActionTimeoutSeconds);
         }
     }
 

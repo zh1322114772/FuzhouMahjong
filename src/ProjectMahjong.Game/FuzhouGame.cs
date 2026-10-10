@@ -2,10 +2,9 @@ using ProjectMahjong.Contracts;
 
 namespace ProjectMahjong.Game;
 
-public sealed record EngineActionResult(bool Accepted, string? Error, bool StartClaimTimer = false)
+public sealed record EngineActionResult(bool Accepted, string? Error)
 {
-    public static EngineActionResult Success(bool startClaimTimer = false) =>
-        new(true, null, startClaimTimer);
+    public static EngineActionResult Success() => new(true, null);
 
     public static EngineActionResult Reject(string error) => new(false, error);
 }
@@ -108,7 +107,6 @@ public sealed class FuzhouGame
 
         State.HandNumber = 0;
         State.Dealer = Seat.East;
-        State.DealerContinuation = 0;
         State.Phase = HandPhase.NotStarted;
         return StartNextHand();
     }
@@ -153,7 +151,7 @@ public sealed class FuzhouGame
 
         State.PendingClaims = pending;
         State.Phase = HandPhase.AwaitingClaims;
-        return EngineActionResult.Success(startClaimTimer: true);
+        return EngineActionResult.Success();
     }
 
     public EngineActionResult DeclareSelfDrawnWin(Seat seat)
@@ -561,12 +559,6 @@ public sealed class FuzhouGame
             points += concealedKongs * 2;
         }
 
-        if (State.DealerContinuation > 0)
-        {
-            items.Add($"连庄 {State.DealerContinuation} × 2");
-            points += State.DealerContinuation * 2;
-        }
-
         if (goldCount >= 3)
         {
             items.Add("三金倒");
@@ -608,14 +600,9 @@ public sealed class FuzhouGame
         State.PendingClaims = null;
         State.Phase = HandPhase.Ended;
 
-        if (winner is null || winner == State.Dealer)
-        {
-            State.DealerContinuation++;
-            return;
-        }
-
-        State.Dealer = NextSeat(State.Dealer);
-        State.DealerContinuation = 0;
+        // The next player counterclockwise from the winner opens the next hand.
+        // After a draw, rotate from the current dealer so every seat progresses.
+        State.Dealer = NextSeat(winner ?? State.Dealer);
     }
 
     private bool CanActOnOwnTurn(Seat seat) =>

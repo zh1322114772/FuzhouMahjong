@@ -1,7 +1,7 @@
-<section class="game-status card">
-    <div><span>第 @Snapshot.HandNumber / @Snapshot.TotalHands 局</span><strong>@Snapshot.StatusMessage</strong></div>
-    <div><span>庄家</span><strong>@GameUi.SeatName(Snapshot.Dealer)</strong></div>
-    <div class="gold-status">
+<section class="game-status" aria-label="牌局状态">
+    <span class="hand-number">第 @Snapshot.HandNumber / @Snapshot.TotalHands 局</span>
+    <strong class="status-message">@Snapshot.StatusMessage</strong>
+    <div class="gold-status" aria-label="金牌">
         <span>金</span>
         @if (Snapshot.GoldTile is not null)
         {
@@ -12,9 +12,15 @@
             <strong>未开</strong>
         }
     </div>
-    <div><span>牌墙</span><strong>@Snapshot.TilesRemaining 张</strong></div>
+    <span class="wall-count">余 @Snapshot.TilesRemaining</span>
+    @if (Snapshot.ActionDeadlineUtc is not null)
+    {
+        <strong class="action-timer @(ActionSecondsRemaining <= 10 ? "urgent" : string.Empty)"
+                aria-label="本次操作剩余 @ActionSecondsRemaining 秒">@ActionSecondsRemaining</strong>
+    }
 </section>
 
 @code {
     [Parameter, EditorRequired] public RoomSnapshotDto Snapshot { get; set; } = default!;
+    [Parameter] public int ActionSecondsRemaining { get; set; }
 }

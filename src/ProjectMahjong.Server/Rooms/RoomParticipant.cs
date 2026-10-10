@@ -27,9 +27,17 @@ public sealed class RoomParticipant(
 
     public string? ConnectionId { get; set; }
 
+    public bool HasConnected { get; set; }
+
     public int StartingScore { get; } = startingScore;
 
     public bool IsConnected => IsBot || ConnectionId is not null;
+
+    /// <summary>
+    /// Native bots always act automatically. A human is temporarily automated only
+    /// after they have joined the live connection once and subsequently disconnected.
+    /// </summary>
+    public bool IsAutomated => IsBot || (HasConnected && !IsConnected);
 
     public PlayerSessionDto ToSession(string roomCode) =>
         new(roomCode, Id, DisplayName, ReconnectToken);

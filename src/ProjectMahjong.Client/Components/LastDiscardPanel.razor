@@ -7,11 +7,6 @@
         <MahjongTile Tile="Snapshot.LastDiscard"
                      Disabled="true"
                      IsGold="@GameUi.IsGold(Snapshot.LastDiscard, Snapshot.GoldTile)" />
-        @if (Snapshot.PendingDiscard is not null)
-        {
-            <span class="claim-timer @(ClaimSecondsRemaining <= 5 ? "urgent" : string.Empty)"
-                  title="响应剩余时间">@ClaimSecondsRemaining</span>
-        }
     }
     else
     {
@@ -21,5 +16,4 @@
 
 @code {
     [Parameter, EditorRequired] public RoomSnapshotDto Snapshot { get; set; } = default!;
-    [Parameter] public int ClaimSecondsRemaining { get; set; }
 }

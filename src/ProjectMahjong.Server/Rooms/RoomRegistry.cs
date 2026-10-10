@@ -12,7 +12,7 @@ public sealed class RoomRegistry(
     IOptions<FuzhouRuleOptions> options,
     ILogger<RoomRegistry> logger)
 {
-    private const string RoomCodeCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private const int RoomCodeLength = 6;
     private readonly ConcurrentDictionary<string, RoomSession> _rooms = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, PlayerLocation> _connections = [];
     private readonly FuzhouRuleOptions _options = options.Value;
@@ -84,6 +84,7 @@ public sealed class RoomRegistry(
 
         _connections[connectionId] = new PlayerLocation(room.Code, request.PlayerId);
         await BroadcastAsync(room);
+        await ScheduleActionTimeoutAsync(room);
         return null;
     }
 
@@ -97,7 +98,9 @@ public sealed class RoomRegistry(
 
         if (await room.DisconnectAsync(location.PlayerId, connectionId))
         {
+            await room.RunBotsAsync();
             await BroadcastAsync(room);
+            await ScheduleActionTimeoutAsync(room);
         }
     }
 
@@ -182,29 +185,34 @@ public sealed class RoomRegistry(
             return CommandReplyDto.Rejected(mutation.Error ?? "操作失败。", mutation.Revision);
         }
 
-        var botClaimTileId = await room.RunBotsAsync();
+        await room.RunBotsAsync();
         await BroadcastAsync(room);
-        if (botClaimTileId is int tileId)
-        {
-            ScheduleClaimTimeout(room, tileId);
-        }
+        await ScheduleActionTimeoutAsync(room);
 
         return CommandReplyDto.Success(mutation.Revision);
     }
 
-    private void ScheduleClaimTimeout(RoomSession room, int claimTileId)
+    private async Task ScheduleActionTimeoutAsync(RoomSession room)
     {
+        var deadline = await room.GetActionDeadlineAsync();
+        if (deadline is null)
+        {
+            return;
+        }
+
         _ = Task.Run(async () =>
         {
-            await Task.Delay(TimeSpan.FromSeconds(_options.ClaimTimeoutSeconds));
-            if (await room.ResolveClaimTimeoutAsync(claimTileId))
+            var delay = deadline.DueAtUtc - DateTimeOffset.UtcNow;
+            if (delay > TimeSpan.Zero)
             {
-                var nextClaimTileId = await room.RunBotsAsync();
+                await Task.Delay(delay);
+            }
+
+            if (await room.ResolveActionTimeoutAsync(deadline.Id))
+            {
+                await room.RunBotsAsync();
                 await BroadcastAsync(room);
-                if (nextClaimTileId is int tileId)
-                {
-                    ScheduleClaimTimeout(room, tileId);
-                }
+                await ScheduleActionTimeoutAsync(room);
             }
         });
     }
@@ -231,16 +239,16 @@ public sealed class RoomRegistry(
 
     private static string CreateRoomCode()
     {
-        Span<char> code = stackalloc char[6];
+        Span<char> code = stackalloc char[RoomCodeLength];
         for (var index = 0; index < code.Length; index++)
         {
-            code[index] = RoomCodeCharacters[Random.Shared.Next(RoomCodeCharacters.Length)];
+            code[index] = (char)('0' + Random.Shared.Next(10));
         }
 
         return code.ToString();
     }
 
-    private static string NormalizeCode(string roomCode) => roomCode.Trim().ToUpperInvariant();
+    private static string NormalizeCode(string roomCode) => roomCode.Trim();
 
     private sealed record PlayerLocation(string RoomCode, Guid PlayerId);
 }

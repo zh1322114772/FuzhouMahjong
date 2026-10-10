@@ -13,8 +13,8 @@ room activity. Shared types are in `ProjectMahjong.Contracts`.
 | `POST /api/rooms/{code}/rejoin` | `RejoinRoomRequest` | `SessionResponseDto` | Validate a saved player ID and reconnect token |
 
 Validation failures return HTTP 400 with `ApiErrorDto`. Display names are
-trimmed, required, limited to 12 characters, and unique within a room ignoring
-case. Room codes are normalized to uppercase and omit ambiguous characters.
+trimmed, required, limited to 8 characters, and unique within a room ignoring
+case. Newly created room codes contain exactly six decimal digits.
 
 `SessionResponseDto` contains a private `PlayerSessionDto` plus the first
 viewer-specific snapshot. Never send one player's session DTO to another

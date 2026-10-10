@@ -1,0 +1,26 @@
+.tile-group { position: relative; min-width: 0; display: inline-flex; flex: 0 0 auto; justify-content: center; align-self: flex-start; }
+.tile-group.repeated { margin-bottom: 0; }
+.tile-count {
+    position: absolute;
+    right: -.1rem;
+    bottom: -.28rem;
+    z-index: 2;
+    width: .82rem;
+    min-width: .82rem;
+    height: .82rem;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 58%);
+    border-radius: 99rem;
+    color: white;
+    background: rgb(8 48 35 / 76%);
+    font-size: .44rem;
+    font-weight: 850;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+    backdrop-filter: blur(2px);
+}

@@ -85,7 +85,7 @@ static string? ValidateDisplayName(string? displayName)
         return "请输入名字。";
     }
 
-    return trimmed.Length > 12 ? "名字最多十二个字符。" : null;
+    return trimmed.Length > 8 ? "名字最多八个字符。" : null;
 }
 
 public partial class Program;

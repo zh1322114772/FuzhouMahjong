@@ -9,3 +9,15 @@
     .result-card { padding: 1rem; }
     .result-card h2 { font-size: 1.5rem; }
 }
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .result-overlay { padding: .4rem; }
+    .result-card { width: min(42rem, 92%); max-height: calc(100% - .4rem); padding: .65rem 1rem; font-size: .75rem; }
+    .result-card .eyebrow { margin: 0; }
+    .result-card h2 { margin: .1rem 0 .3rem; font-size: 1.2rem; }
+    .result-card p { margin: .25rem 0; }
+    .result-card ul { display: flex; flex-wrap: wrap; gap: .2rem 1.1rem; margin: .25rem 0; padding-left: 1.2rem; }
+    .payments { gap: .25rem; margin: .35rem 0; }
+    .payments span { padding: .25rem .45rem; }
+    .result-card .button { min-height: 2.35rem; padding: .3rem .7rem; font-size: .85rem; }
+}

@@ -12,7 +12,8 @@ public sealed record FuzhouRuleOptions
 
     public int BaseHandPoints { get; init; } = 3;
 
-    public int ClaimTimeoutSeconds { get; init; } = 20;
+    /// <summary>Time allowed for either a turn action or a discard claim.</summary>
+    public int ActionTimeoutSeconds { get; init; } = 60;
 
     public int EmptyRoomLifetimeMinutes { get; init; } = 30;
 }

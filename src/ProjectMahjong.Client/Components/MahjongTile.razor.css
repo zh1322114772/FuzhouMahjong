@@ -72,3 +72,7 @@
     .mahjong-tile { --tile-width: 3rem; --tile-height: 4.25rem; }
     .mahjong-tile.compact { --tile-width: 1.85rem; --tile-height: 2.6rem; }
 }
+
+@media (max-width: 1100px) {
+    .mahjong-tile.selected { transform: none; }
+}

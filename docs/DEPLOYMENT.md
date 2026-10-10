@@ -32,7 +32,7 @@ Optional rule overrides can be added under the app's `environment` section in
 ```yaml
 environment:
   ASPNETCORE_ENVIRONMENT: Production
-  FuzhouRules__ClaimTimeoutSeconds: 30
+  FuzhouRules__ActionTimeoutSeconds: 60
   FuzhouRules__EmptyRoomLifetimeMinutes: 60
 ```
 
