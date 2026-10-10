@@ -5,7 +5,17 @@
         <span class="avatar @(IsCurrentTurn ? "current-turn" : string.Empty) @(IsDisconnected ? "disconnected" : string.Empty)"
               title="@(IsDisconnected ? "玩家掉线，AI 暂时接管" : Player.DisplayName)">@NameInitial</span>
         <span class="identity-text">
-            <strong class="player-name @(IsDealer ? "dealer" : string.Empty) @(IsDisconnected ? "disconnected" : string.Empty)">@Player.DisplayName</strong>
+            <strong class="player-name @(IsDealer ? "dealer" : string.Empty) @(IsDisconnected ? "disconnected" : string.Empty)">
+                @Player.DisplayName
+                @if (IsDealer)
+                {
+                    <span class="dealer-badge" title="庄位" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="16" height="16" focusable="false" aria-hidden="true">
+                            <path d="M12 2l2.9 5.9L21 9l-4.5 3.6L17.8 20 12 16.9 6.2 20l1.3-7.4L3 9l6.1-1.1L12 2z" fill="#ffd859" stroke="#b07e00" stroke-width="0.5" />
+                        </svg>
+                    </span>
+                }
+            </strong>
             <small>@GameUi.SeatName(Player.Seat) · @Player.Score 分</small>
             @if (IsDisconnected)
             {
@@ -54,7 +64,7 @@
     <div class="public-tiles">
         @if (Player.Flowers.Count > 0)
         {
-            <div class="public-group" aria-label="花牌"><span class="group-label">花</span><TileGroup Tiles="Player.Flowers" GoldTile="GoldTile" /></div>
+            <div class="public-group" aria-label="花牌"><span class="group-label">花</span><TileGroup Tiles="Player.Flowers" GoldTile="GoldTile" GroupBonusTiles="true" /></div>
         }
         @foreach (var meld in Player.Melds)
         {

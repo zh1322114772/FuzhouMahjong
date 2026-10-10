@@ -69,7 +69,6 @@ public sealed class FuzhouGame
         State.LastDiscard = null;
         State.LastDiscardedBy = null;
         State.LastHandScore = null;
-        State.HandNumber++;
 
         foreach (var seat in SeatsInOrderFrom(State.Dealer))
         {
@@ -600,9 +599,11 @@ public sealed class FuzhouGame
         State.PendingClaims = null;
         State.Phase = HandPhase.Ended;
 
-        // The next player counterclockwise from the winner opens the next hand.
-        // After a draw, rotate from the current dealer so every seat progresses.
-        State.Dealer = NextSeat(winner ?? State.Dealer);
+        if (winner != State.Dealer) 
+        { 
+            State.Dealer = NextSeat(State.Dealer);
+            State.HandNumber++;
+        }
     }
 
     private bool CanActOnOwnTurn(Seat seat) =>

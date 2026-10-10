@@ -1,7 +1,9 @@
 @foreach (var group in Groups)
 {
     <span class="tile-group @(group.Count > 1 ? "repeated" : string.Empty) @(IsHonor(group.Tile) ? "honor-tile" : string.Empty)"
-          title="@(group.Count > 1 ? $"{group.Tile.Label} ×{group.Count}" : group.Tile.Label)">
+          title="@(GroupBonusTiles
+              ? $"花牌 ×{group.Count}"
+              : group.Count > 1 ? $"{group.Tile.Label} ×{group.Count}" : group.Tile.Label)">
         <MahjongTile Tile="group.Tile" Compact="true" Disabled="true" IsGold="@IsGold(group.Tile)" />
         @if (group.Count > 1)
         {
@@ -13,9 +15,10 @@
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TileDto> Tiles { get; set; } = [];
     [Parameter] public TileDto? GoldTile { get; set; }
+    [Parameter] public bool GroupBonusTiles { get; set; }
 
     private IEnumerable<TileCount> Groups => Tiles
-        .GroupBy(tile => tile.Code)
+        .GroupBy(tile => GroupBonusTiles ? "Bonus" : tile.Code)
         .Select(group => new TileCount(group.First(), group.Count()))
         .OrderBy(group => TileOrder(group.Tile.Suit))
         .ThenBy(group => group.Tile.Rank);

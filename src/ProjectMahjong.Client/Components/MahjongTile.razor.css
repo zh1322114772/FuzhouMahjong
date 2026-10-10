@@ -29,6 +29,17 @@
 .mahjong-tile.selected { transform: translateY(-.7rem); box-shadow: 0 0 0 4px #f1b83d, 0 .35rem .65rem rgb(0 0 0 / 32%); }
 .mahjong-tile.gold-tile { border-color: #d29c20; border-bottom-color: #ba7b13; box-shadow: inset .14rem .12rem rgb(255 255 255 / 90%), inset -.13rem -.12rem rgb(127 110 78 / 15%), 0 0 0 3px #ffd85a, 0 0 1rem rgb(255 207 52 / 78%); }
 .mahjong-tile.gold-tile.selected { box-shadow: 0 0 0 5px #ffb300, 0 0 1.25rem rgb(255 196 0 / 90%); }
+.mahjong-tile.gold-tile::before {
+    /* subtle yellow translucent overlay to make gold tiles more obvious */
+    content: "";
+    position: absolute;
+    inset: .15rem; /* match inner inset used by ::after */
+    border-radius: .3rem;
+    background: linear-gradient(180deg, rgba(255,230,130,0.18), rgba(255,205,60,0.12));
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+.mahjong-tile.compact.gold-tile::before { inset: .05rem; border-radius: .2rem; }
 .mahjong-tile:disabled { opacity: 1; }
 .mahjong-tile.compact { --tile-width: 2.15rem; --tile-height: 3rem; padding: .05rem .06rem .17rem; border-bottom-width: .2rem; border-radius: .3rem; }
 .tile-face { display: block; width: 100%; height: 100%; overflow: visible; }

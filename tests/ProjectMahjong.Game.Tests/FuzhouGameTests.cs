@@ -69,11 +69,11 @@ public sealed class FuzhouGameTests
         Assert.All(game.State.Players.Where(pair => pair.Key != Seat.East), pair =>
             Assert.Equal(97, pair.Value.Score));
         Assert.Equal(HandPhase.Ended, game.State.Phase);
-        Assert.Equal(Seat.South, game.State.Dealer);
+        Assert.Equal(Seat.East, game.State.Dealer);
     }
 
     [Fact]
-    public void WinnerDeterminesWhoStartsTheNextHand()
+    public void NonDealerWinnerAdvancesDealerToNextSeat()
     {
         var game = CreateGame();
         Assert.True(game.StartNextHand().Accepted);
@@ -83,10 +83,10 @@ public sealed class FuzhouGameTests
         game.State.Players[Seat.West].Hand.AddRange(WinningHand());
 
         Assert.True(game.DeclareSelfDrawnWin(Seat.West).Accepted);
-        Assert.Equal(Seat.North, game.State.Dealer);
+        Assert.Equal(Seat.South, game.State.Dealer);
 
         Assert.True(game.StartNextHand().Accepted);
-        Assert.Equal(Seat.North, game.State.CurrentTurn);
+        Assert.Equal(Seat.South, game.State.CurrentTurn);
     }
 
     [Fact]
